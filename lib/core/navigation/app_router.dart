@@ -4,6 +4,7 @@ import '../../screens/auth/welcome_screen.dart';
 import '../../screens/auth/sign_in_screen.dart';
 import '../../screens/auth/sign_up_screen.dart';
 import '../../screens/auth/forgot_password_screen.dart';
+import '../../screens/auth/otp_verification_screen.dart';
 import '../../screens/main/main_screen.dart';
 import '../../screens/station/station_detail_screen.dart';
 import '../../screens/charging/charging_status_screen.dart';
@@ -23,6 +24,9 @@ class AppRouter {
         return _buildRoute(const SignInScreen(), settings);
       case '/sign-up':
         return _buildRoute(const SignUpScreen(), settings);
+      case '/otp-verification':
+        final email = settings.arguments as String? ?? '';
+        return _buildRoute(OtpVerificationScreen(email: email), settings);
       case '/forgot-password':
         return _buildRoute(const ForgotPasswordScreen(), settings);
       case '/main':

@@ -13,6 +13,13 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   bool _obscurePassword = true;
+  final TextEditingController _emailController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,11 +178,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                                                 const SizedBox(height: 20),
-                        const SunVoltTextField(
+                        SunVoltTextField(
                           label: 'E-mail',
                           hintText: 'contoh@gmail.com',
+                          controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
-                          prefixIcon: Icon(
+                          prefixIcon: const Icon(
                             Icons.mail_outline,
                             color: AppColors.onSurfaceVariant,
                           ),
@@ -214,12 +222,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               SunVoltConfirmationDialog.show(
                                 context,
                                 title: 'Konfirmasi Pendaftaran',
-                                message: 'Apakah Anda yakin semua data yang Anda masukkan sudah benar?',
+                                message:
+                                    'Kami akan mengirimkan kode verifikasi ke email ${_emailController.text}. Pastikan email Anda benar.',
                                 onConfirm: () {
-                                  Navigator.pushNamedAndRemoveUntil(
+                                  Navigator.pushNamed(
                                     context,
-                                    '/main',
-                                    (route) => false,
+                                    '/otp-verification',
+                                    arguments: _emailController.text,
                                   );
                                 },
                               );
