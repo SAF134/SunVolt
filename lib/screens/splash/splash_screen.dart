@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/services/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -37,13 +38,24 @@ class _SplashScreenState extends State<SplashScreen>
     _timer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
       if (_loadingProgress >= 1.0) {
         timer.cancel();
-        Navigator.of(context).pushReplacementNamed('/welcome');
+        _checkAuthAndNavigate();
         return;
       }
       setState(() {
         _loadingProgress += 0.01;
       });
     });
+  }
+
+  void _checkAuthAndNavigate() {
+    final user = AuthService().currentUser;
+    if (mounted) {
+      if (user != null) {
+        Navigator.of(context).pushReplacementNamed('/main');
+      } else {
+        Navigator.of(context).pushReplacementNamed('/welcome');
+      }
+    }
   }
 
   @override

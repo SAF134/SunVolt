@@ -1,9 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/services/auth_service.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  final _authService = AuthService();
+  bool _isLoading = false;
+
+  void _handleGoogleSignIn() async {
+    setState(() => _isLoading = true);
+    try {
+      final user = await _authService.signInWithGoogle();
+      if (mounted && user != null) {
+        Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login Google gagal: $e'),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -169,84 +202,50 @@ class WelcomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            // Buttons
+            // Google Sign-In Button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Column(
                 children: [
-                  // Masuk button
                   SizedBox(
                     width: double.infinity,
-                    height: 72,
-                    child: Material(
-                      color: AppColors.primaryContainer,
-                      borderRadius: BorderRadius.circular(16),
-                      child: InkWell(
-                        onTap: () => Navigator.pushNamed(context, '/sign-in'),
-                        borderRadius: BorderRadius.circular(16),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Masuk',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.onPrimaryContainer,
-                                ),
-                              ),
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.3),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.arrow_forward,
-                                  color: AppColors.onPrimaryContainer,
-                                ),
-                              ),
-                            ],
-                          ),
+                    height: 56,
+                    child: OutlinedButton(
+                      onPressed: _isLoading ? null : _handleGoogleSignIn,
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Daftar button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 72,
-                    child: Material(
-                      color: AppColors.secondary,
-                      borderRadius: BorderRadius.circular(16),
-                      child: InkWell(
-                        onTap: () => Navigator.pushNamed(context, '/sign-up'),
-                        borderRadius: BorderRadius.circular(16),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Daftar',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.onSecondary,
-                                ),
-                              ),
-                              Icon(
-                                Icons.person_add,
-                                color: Colors.white.withValues(alpha: 0.8),
-                              ),
-                            ],
-                          ),
+                        side: BorderSide(
+                          color: AppColors.onSurfaceVariant.withValues(alpha: 0.1),
                         ),
+                        backgroundColor: Colors.white.withValues(alpha: 0.5),
                       ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/images/google.png',
+                                  height: 24,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(Icons.g_mobiledata, size: 24),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Masuk dengan akun Google',
+                                  style: GoogleFonts.manrope(
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
                     ),
                   ),
                   const SizedBox(height: 16),

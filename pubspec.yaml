@@ -7,10 +7,13 @@ environment:
   sdk: ^3.11.1
 
 dependencies:
+  firebase_auth: ^6.3.0
+  firebase_core: ^4.6.0
   flutter:
     sdk: flutter
   flutter_map: ^8.2.2
   google_fonts: ^8.0.2
+  google_sign_in: ^7.2.0
   latlong2: ^0.9.1
 
 dev_dependencies:

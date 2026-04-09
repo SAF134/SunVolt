@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "13689390716",
+    "project_id": "sunvolt-38cf9",
+    "storage_bucket": "sunvolt-38cf9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:13689390716:android:a710e36029d50f5c1d6bf9",
+        "android_client_info": {
+          "package_name": "com.example.sunvolt_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "13689390716-o4oacqkp1lhbdekosmda0v9b73ecf2i4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sunvolt_app",
+            "certificate_hash": "c90766e6085b69c31fb588b3ecd031f102eca5b6"
+          }
+        },
+        {
+          "client_id": "13689390716-6n99s1q5kuemjdrq4omkghknd477ngoc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRM-pCZBw-Pu0sSD8LzrFizZLDY44HsZw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "13689390716-6n99s1q5kuemjdrq4omkghknd477ngoc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

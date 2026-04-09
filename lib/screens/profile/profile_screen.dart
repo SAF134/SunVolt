@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_confirmation_dialog.dart';
+import '../../core/services/auth_service.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final User? user = FirebaseAuth.instance.currentUser;
+    final String displayName = user?.displayName ?? 'Pengguna';
+    final String email = user?.email ?? '-';
+    final String? photoUrl = user?.photoURL;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Column(
@@ -66,7 +73,7 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const SizedBox(height: 40),
-                  // Avatar
+                  // Avatar - show Google profile photo if available
                   Container(
                     width: 100,
                     height: 100,
@@ -81,64 +88,73 @@ class ProfileScreen extends StatelessWidget {
                       ],
                     ),
                     child: ClipOval(
-                      child: Image.network(
-                        'https://lh3.googleusercontent.com/aida-public/AB6AXuBWYaGPzV1ioI7Z4v_nqBN_xb9W5kZM6h_Mw_EvO7mM7DSVPKrNp250Ghe-3IHcJqIpKkfoxoIjxTrVEXIRVxlQCkMC1i1P1tLTGPRILhMeQMSxPjCbHYlL9h-xp8x8e6k-Z1pA4gzwAhKfg9kkJBNKCNzw6B7m01jYoKVKLZMv8V-BefZgqEjlwg14jixaWBL-MFu5SzY4Rrt1TlZvnumrv4U6WTmCMW8C7AyXFsZYfhH-C3LUVwHBJPbBwOXhnKbqBh-aU9hC8',
-                        fit: BoxFit.cover,
-                        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                          if (wasSynchronouslyLoaded) return child;
-                          return AnimatedOpacity(
-                            opacity: frame == null ? 0 : 1,
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.easeOut,
-                            child: child,
-                          );
-                        },
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
-                              strokeWidth: 2,
-                              color: AppColors.onPrimaryContainer.withValues(alpha: 0.3),
+                      child: photoUrl != null
+                          ? Image.network(
+                              photoUrl,
+                              fit: BoxFit.cover,
+                              width: 100,
+                              height: 100,
+                              frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                                if (wasSynchronouslyLoaded) return child;
+                                return AnimatedOpacity(
+                                  opacity: frame == null ? 0 : 1,
+                                  duration: const Duration(milliseconds: 500),
+                                  curve: Curves.easeOut,
+                                  child: child,
+                                );
+                              },
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes != null
+                                        ? loadingProgress.cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                        : null,
+                                    strokeWidth: 2,
+                                    color: AppColors.onPrimaryContainer.withValues(alpha: 0.3),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (_, e, s) => const Icon(
+                                Icons.person,
+                                size: 48,
+                                color: AppColors.onPrimaryContainer,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.person,
+                              size: 48,
+                              color: AppColors.onPrimaryContainer,
                             ),
-                          );
-                        },
-                        errorBuilder: (_, e, s) => const Icon(
-                          Icons.person,
-                          size: 48,
-                          color: AppColors.onPrimaryContainer,
-                        ),
-                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Name
+                  // Name from Google account
                   Text(
-                    'SAF',
+                    displayName,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 24, fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 4),
+                  // Email from Google account
                   Text(
-                    'saf@gmail.com',
+                    email,
                     style: GoogleFonts.manrope(
                       fontSize: 14, color: AppColors.onSurfaceVariant,
                     ),
                   ),
-                                    const SizedBox(height: 24),
+                  const SizedBox(height: 24),
                   // Menu
-                  ProfileMenuItem(icon: Icons.person_outline, title: 'Edit Profil', onTap: () {
-                    Navigator.pushNamed(context, '/edit-profile');
-                  }),
                   ProfileMenuItem(icon: Icons.help_outline, title: 'Bantuan & FAQ', onTap: () {
                     Navigator.pushNamed(context, '/help-faq');
                   }),
                   ProfileMenuItem(icon: Icons.info_outline, title: 'Tentang Aplikasi', onTap: () {
                     Navigator.pushNamed(context, '/about');
+                  }),
+                  ProfileMenuItem(icon: Icons.code, title: 'Tentang Pengembang', onTap: () {
+                    Navigator.pushNamed(context, '/developer-info');
                   }),
                   const SizedBox(height: 16),
                   // Logout
@@ -152,10 +168,14 @@ class ProfileScreen extends StatelessWidget {
                           title: 'Konfirmasi Keluar',
                           message: 'Apakah Anda yakin ingin keluar dari akun SunVolt Anda?',
                           isDestructive: true,
-                          onConfirm: () {
-                            Navigator.pushNamedAndRemoveUntil(
-                              context, '/welcome', (route) => false,
-                            );
+                          onConfirm: () async {
+                            final authService = AuthService();
+                            await authService.signOut();
+                            if (context.mounted) {
+                              Navigator.pushNamedAndRemoveUntil(
+                                context, '/welcome', (route) => false,
+                              );
+                            }
                           },
                         );
                       },
