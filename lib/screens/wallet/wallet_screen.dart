@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_app_bar.dart';
-import '../../core/widgets/sunvolt_transaction_item.dart';
 import '../../core/widgets/sunvolt_confirmation_dialog.dart';
 import '../payment/payment_success_screen.dart';
 
@@ -62,6 +61,7 @@ class _WalletScreenState extends State<WalletScreen> {
           final double energyValue = addedAmount / 2500;
           final String energyText = addedAmount == 1 ? '0.0004 kWh' : '${energyValue.toStringAsFixed(1)} kWh';
 
+          if (!mounted) return;
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -181,7 +181,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'SALDO TERSEDIA',
+                                    'SALDO DOMPET TERSEDIA',
                                     style: GoogleFonts.manrope(
                                       fontSize: 12, fontWeight: FontWeight.w700,
                                       letterSpacing: 1.5, color: Colors.white70,
@@ -209,12 +209,24 @@ class _WalletScreenState extends State<WalletScreen> {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              Text(
-                                _currencyFormat.format(balance),
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 40, fontWeight: FontWeight.w800, color: Colors.white,
-                                  letterSpacing: -1,
-                                ),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.account_balance_wallet_rounded,
+                                    color: AppColors.primaryContainer,
+                                    size: 32,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    _currencyFormat.format(balance),
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 40,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                      letterSpacing: -1,
+                                    ),
+                                  ),
+                                ],
                               ),
                               const SizedBox(height: 8),
                               Row(
@@ -222,9 +234,9 @@ class _WalletScreenState extends State<WalletScreen> {
                                   const Icon(Icons.bolt, color: AppColors.primaryContainer, size: 16),
                                   const SizedBox(width: 4),
                                   Text(
-                                    '${energy.toStringAsFixed(1)} kWh Total Energi',
+                                    '${energy.toStringAsFixed(2)} kWh Total Energi',
                                     style: GoogleFonts.manrope(
-                                      fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white70,
+                                      fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white70,
                                     ),
                                   ),
                                 ],
@@ -313,12 +325,19 @@ class _WalletScreenState extends State<WalletScreen> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: Text(
-                          'Top Up Sekarang',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                          ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.account_balance_wallet_outlined),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Top Up Sekarang',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -333,21 +352,7 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  String _formatTimestamp(Timestamp? timestamp) {
-    if (timestamp == null) return 'Baru saja';
-    final now = DateTime.now();
-    final date = timestamp.toDate();
-    final diff = now.difference(date);
 
-    if (diff.inMinutes < 1) return 'Baru saja';
-    if (diff.inMinutes < 60) return '${diff.inMinutes} menit yang lalu';
-    if (diff.inHours < 24) return '${diff.inHours} jam yang lalu';
-    if (diff.inDays < 7) {
-      if (diff.inDays == 1) return 'Kemarin';
-      return '${diff.inDays} hari yang lalu';
-    }
-    return DateFormat('dd MMM yyyy').format(date);
-  }
 }
 
 class TopUpOptionCard extends StatelessWidget {

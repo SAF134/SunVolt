@@ -44,11 +44,11 @@ class SunVoltBottomNav extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
           child: Container(
             color: Colors.white.withValues(alpha: 0.7),
-            padding: const EdgeInsets.only(
+            padding: EdgeInsets.only(
               left: 16,
               right: 16,
               top: 12,
-              bottom: 24,
+              bottom: 24 + MediaQuery.of(context).padding.bottom,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,

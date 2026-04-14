@@ -45,7 +45,7 @@ class DeveloperInfoScreen extends StatelessWidget {
         'instagram': '@firecalm',
         'whatsapp': '+62 822-7985-1130',
         'email': 'rizkyjh@student.telkomuniversity.ac.id',
-        'image': 'assets/images/rikzy.jpg',
+        'image': 'assets/images/rizky.jpg',
       },
     ];
 

@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // My Location button
           Positioned(
-            top: 110,
+            top: 134,
             right: 24,
             child: GestureDetector(
               onTap: () {
@@ -142,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: const Icon(
                   Icons.my_location,
                   color: Color(0xFFEAB308),
-                  size: 24,
+                  size: 20,
                 ),
               ),
             ),
@@ -151,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Bottom station info card
           Positioned(
-            bottom: 16,
+            bottom: 150,
             left: 24,
             right: 24,
             child: SunVoltStationCard(

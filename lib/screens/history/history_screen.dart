@@ -27,7 +27,7 @@ class HistoryScreen extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Text(
-                      'Riwayat Aktivitas',
+                      'Riwayat',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 25, fontWeight: FontWeight.w800,
                         height: 1.1, letterSpacing: -1,
@@ -35,20 +35,6 @@ class HistoryScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const SizedBox(height: 24),
-                  // Section header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Text(
-                      'Hari Ini',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.onSurface,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
                   StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('users')
@@ -80,10 +66,10 @@ class HistoryScreen extends StatelessWidget {
                           if (isTopUp) {
                             final amountStr = (data['amount'] ?? '').toString().replaceAll(RegExp(r'[^0-9]'), '');
                             final amountNum = int.tryParse(amountStr) ?? 0;
-                            final kWh = (amountNum / 2500).toStringAsFixed(1);
+                            final kWh = (amountNum / 2500).toStringAsFixed(2);
                             energyText = '+$kWh kWh';
                           } else {
-                            final rawEnergy = data['energy'] ?? '1.0 kWh';
+                            final rawEnergy = data['energy'] ?? '1.00 kWh';
                             energyText = rawEnergy.toString().startsWith('-') ? rawEnergy : '-$rawEnergy';
                           }
 

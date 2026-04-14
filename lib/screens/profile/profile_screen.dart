@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_confirmation_dialog.dart';
 import '../../core/services/auth_service.dart';
@@ -145,6 +146,42 @@ class ProfileScreen extends StatelessWidget {
                       fontSize: 14, color: AppColors.onSurfaceVariant,
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  // Role Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: (email == 'firecalm2@gmail.com' || 
+                              email == 'syauqiakmal137@gmail.com' || 
+                              email == 'fattaha.rasyad@gmail.com')
+                          ? AppColors.voltGreen.withValues(alpha: 0.1)
+                          : AppColors.primaryContainer.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: (email == 'firecalm2@gmail.com' || 
+                                email == 'syauqiakmal137@gmail.com' || 
+                                email == 'fattaha.rasyad@gmail.com')
+                            ? AppColors.voltGreen.withValues(alpha: 0.2)
+                            : AppColors.primaryContainer.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Text(
+                      (email == 'firecalm2@gmail.com' || 
+                       email == 'syauqiakmal137@gmail.com' || 
+                       email == 'fattaha.rasyad@gmail.com')
+                          ? 'Pengembang'
+                          : 'Pembeli',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: (email == 'firecalm2@gmail.com' || 
+                                email == 'syauqiakmal137@gmail.com' || 
+                                email == 'fattaha.rasyad@gmail.com')
+                            ? AppColors.voltGreen
+                            : AppColors.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 24),
                   // Menu
                   ProfileMenuItem(icon: Icons.help_outline, title: 'Bantuan & FAQ', onTap: () {
@@ -156,7 +193,44 @@ class ProfileScreen extends StatelessWidget {
                   ProfileMenuItem(icon: Icons.code, title: 'Tentang Pengembang', onTap: () {
                     Navigator.pushNamed(context, '/developer-info');
                   }),
-                  const SizedBox(height: 16),
+                   if (email == 'firecalm2@gmail.com' || 
+                      email == 'syauqiakmal137@gmail.com' || 
+                      email == 'fattaha.rasyad@gmail.com') ...[
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        SunVoltConfirmationDialog.show(
+                          context,
+                          title: 'Konfirmasi Akses',
+                          message: 'Anda akan dialihkan ke halaman Dashboard Admin di browser luar. Lanjutkan?',
+                          confirmLabel: 'Ya',
+                          cancelLabel: 'Tidak',
+                          onConfirm: () async {
+                            final Uri url = Uri.parse('https://lms.telkomuniversity.ac.id/login/index.php');
+                            await launchUrl(url, mode: LaunchMode.externalApplication);
+                          },
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.voltGreen,
+                        side: BorderSide(color: AppColors.voltGreen.withValues(alpha: 0.2)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      icon: const Icon(Icons.admin_panel_settings_outlined),
+                      label: Text(
+                        'Halaman Dashboard',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 16, fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ],
                   // Logout
                   SizedBox(
                     width: double.infinity,

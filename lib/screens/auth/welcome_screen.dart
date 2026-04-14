@@ -238,7 +238,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
-                                  'Masuk dengan akun Google',
+                                  'Masuk dengan Akun Google',
                                   style: GoogleFonts.manrope(
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.onSurface,

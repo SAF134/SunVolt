@@ -52,7 +52,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> with Single
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColors.primaryContainer.withOpacity(0.35), // Sun Yellow tint
+              AppColors.primaryContainer.withValues(alpha: 0.35), // Sun Yellow tint
               AppColors.background,
             ],
           ),
@@ -77,7 +77,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> with Single
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.secondary.withOpacity(0.2),
+                        color: AppColors.secondary.withValues(alpha: 0.2),
                         blurRadius: 40,
                         spreadRadius: 10,
                       ),
@@ -112,7 +112,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> with Single
                     'Saldo & Energi Anda telah bertambah',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 16,
-                      color: AppColors.onSurface.withOpacity(0.6),
+                      color: AppColors.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -126,7 +126,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> with Single
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
+                          color: Colors.black.withValues(alpha: 0.03),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -142,7 +142,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> with Single
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.onSurface.withOpacity(0.4),
+                                color: AppColors.onSurface.withValues(alpha: 0.4),
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -159,7 +159,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> with Single
                         Container(
                           width: 1,
                           height: 40,
-                          color: AppColors.onSurface.withOpacity(0.05),
+                          color: AppColors.onSurface.withValues(alpha: 0.05),
                         ),
                         Column(
                           children: [
@@ -168,7 +168,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> with Single
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.onSurface.withOpacity(0.4),
+                                color: AppColors.onSurface.withValues(alpha: 0.4),
                               ),
                             ),
                             const SizedBox(height: 4),

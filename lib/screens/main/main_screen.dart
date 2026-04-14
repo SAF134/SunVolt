@@ -42,6 +42,7 @@ class _MainScreenState extends State<MainScreen> {
         );
       },
       child: Scaffold(
+        extendBody: true,
         body: IndexedStack(
           index: _currentIndex,
           children: _screens,

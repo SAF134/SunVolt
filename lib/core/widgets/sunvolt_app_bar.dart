@@ -178,7 +178,7 @@ class SaldoBadge extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
               ],
-              const Icon(Icons.bolt, color: Color(0xFFEAB308), size: 16),
+              const Icon(Icons.account_balance_wallet_rounded, color: Color(0xFFEAB308), size: 16),
               const SizedBox(width: 4),
               Text(
                 balanceText,
@@ -224,7 +224,7 @@ class BalanceBadgeCompact extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.bolt, color: Color(0xFFEAB308), size: 16),
+              const Icon(Icons.account_balance_wallet_rounded, color: Color(0xFFEAB308), size: 16),
               const SizedBox(width: 4),
               Text(
                 balanceText,

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -269,11 +268,18 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
                                         ),
                                         elevation: 0,
                                       ),
-                                      child: Text(
-                                        'Bayar Sekarang',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 16, fontWeight: FontWeight.bold
-                                        ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(Icons.payment_rounded, size: 20),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Bayar Sekarang',
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 16, fontWeight: FontWeight.bold
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
@@ -328,11 +334,18 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            child: Text(
-                              'Batalkan Transaksi',
-                              style: GoogleFonts.manrope(
-                                fontSize: 16, fontWeight: FontWeight.bold,
-                              ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.close_rounded, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Batalkan Transaksi',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 16, fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
