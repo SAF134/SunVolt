@@ -21,7 +21,7 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
 
   // Gunakan Ngrok URL agar aplikasi di HP fisik bisa mengakses server backend lokal PC Anda.
   // Jika Ngrok di-restart, URL ini juga harus di-update.
-  final String _baseUrl = 'https://unirradiated-janiece-unconceitedly.ngrok-free.dev';
+  final String _baseUrl = 'https://sunvolt-backend.vercel.app';
 
   Future<void> _createTransaction(String amountStr) async {
     setState(() => _isLoading = true);

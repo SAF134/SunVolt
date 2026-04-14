@@ -9,15 +9,22 @@ app.use(express.json());
 app.use(cors());
 
 // --- KONFIGURASI FIREBASE ADMIN ---
-// Pastikan file serviceAccountKey.json ada di folder 'backend'
 try {
-    const serviceAccount = require("./serviceAccountKey.json");
+    let serviceAccount;
+    // Coba baca dari Environment Variable Vercel terlebih dahulu
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    } else {
+        // Fallback untuk lokal laptop Anda
+        serviceAccount = require("./serviceAccountKey.json");
+    }
+    
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
     });
     console.log("Firebase Admin Berhasil diinisialisasi.");
 } catch (error) {
-    console.error("EROR: File serviceAccountKey.json tidak ditemukan atau tidak valid!");
+    console.error("EROR Inisialisasi Firebase: Pastikan FIREBASE_SERVICE_ACCOUNT sudah disetting di Vercel!", error);
 }
 const db = admin.firestore();
 
