@@ -1,6 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import '../theme/app_colors.dart';
 
 class SunVoltAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -46,7 +49,7 @@ class SunVoltAppBar extends StatelessWidget implements PreferredSizeWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _buildLeading(context),
-                  ?trailing,
+                  trailing ?? const BalanceBadgeCompact(),
                 ],
               ),
             ),
@@ -132,81 +135,109 @@ class SunVoltAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 /// Saldo badge widget for app bar trailing
 class SaldoBadge extends StatelessWidget {
-  final String amount;
   final bool showLabel;
 
   const SaldoBadge({
     super.key,
-    this.amount = 'Rp 0',
     this.showLabel = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (showLabel) ...[
-            Text(
-              'SALDO',
-              style: GoogleFonts.manrope(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: AppColors.onSurfaceVariant,
-                letterSpacing: 1.5,
-              ),
-            ),
-            const SizedBox(width: 8),
-          ],
-          Text(
-            amount,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: AppColors.onSurface,
-            ),
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return const SizedBox.shrink();
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
+      builder: (context, snapshot) {
+        String balanceText = 'Rp 0';
+        if (snapshot.hasData && snapshot.data!.exists) {
+          final data = snapshot.data!.data() as Map<String, dynamic>;
+          final balance = data['balance'] ?? 0;
+          balanceText = 'Rp ${NumberFormat.decimalPattern('id-ID').format(balance)}';
+        }
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.primaryContainer.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(999),
           ),
-        ],
-      ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (showLabel) ...[
+                Text(
+                  'SALDO',
+                  style: GoogleFonts.manrope(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.onPrimaryContainer.withValues(alpha: 0.6),
+                    letterSpacing: 1.5,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+              const Icon(Icons.bolt, color: Color(0xFFEAB308), size: 16),
+              const SizedBox(width: 4),
+              Text(
+                balanceText,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.onPrimaryContainer,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
 
 /// Balance badge with bolt icon variant
 class BalanceBadgeCompact extends StatelessWidget {
-  final String amount;
-
-  const BalanceBadgeCompact({super.key, this.amount = 'Rp 0'});
+  const BalanceBadgeCompact({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.primaryContainer.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.bolt, color: Color(0xFFEAB308), size: 16),
-          const SizedBox(width: 4),
-          Text(
-            amount,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: AppColors.onPrimaryContainer,
-            ),
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return const SizedBox.shrink();
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
+      builder: (context, snapshot) {
+        String balanceText = 'Rp 0';
+        if (snapshot.hasData && snapshot.data!.exists) {
+          final data = snapshot.data!.data() as Map<String, dynamic>;
+          final balance = data['balance'] ?? 0;
+          balanceText = 'Rp ${NumberFormat.decimalPattern('id-ID').format(balance)}';
+        }
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.primaryContainer.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(999),
           ),
-        ],
-      ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.bolt, color: Color(0xFFEAB308), size: 16),
+              const SizedBox(width: 4),
+              Text(
+                balanceText,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.onPrimaryContainer,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

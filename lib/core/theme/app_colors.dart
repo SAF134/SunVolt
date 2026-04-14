@@ -6,8 +6,8 @@ class AppColors {
   AppColors._();
 
   // ── Primary (Sun Yellow - "Action Energy") ──
-  static const Color primary = Color(0xFF705D00);
-  static const Color onPrimary = Color(0xFFFFFFFF);
+  static const Color primary = Color(0xFFFFD700);
+  static const Color onPrimary = Color(0xFF191C1D); // onSurface color for contrast
   static const Color primaryContainer = Color(0xFFFFD700);
   static const Color onPrimaryContainer = Color(0xFF705E00);
   static const Color primaryFixed = Color(0xFFFFE16D);
@@ -54,7 +54,7 @@ class AppColors {
   static const Color surfaceContainer = Color(0xFFEDEEEF);
   static const Color surfaceContainerHigh = Color(0xFFE7E8E9);
   static const Color surfaceContainerHighest = Color(0xFFE1E3E4);
-  static const Color surfaceTint = Color(0xFF705D00);
+  static const Color surfaceTint = Color(0xFFFFD700);
 
   static const Color background = Color(0xFFF8F9FA);
   static const Color onBackground = Color(0xFF191C1D);

@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_app_bar.dart';
 import '../../core/widgets/sunvolt_confirmation_dialog.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class StationDetailScreen extends StatefulWidget {
   const StationDetailScreen({super.key});
@@ -24,7 +27,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
           SunVoltAppBar(
             showBackButton: true,
             title: 'Detail Stasiun',
-            trailing: const BalanceBadgeCompact(amount: 'Rp 0'),
+            trailing: const BalanceBadgeCompact(),
           ),
           // Content
           Expanded(
@@ -175,13 +178,54 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
           width: double.infinity,
           height: 60,
           child: ElevatedButton.icon(
-            onPressed: () {
-              SunVoltConfirmationDialog.show(
-                context,
-                title: 'Konfirmasi Pengisian',
-                message: 'Apakah Anda yakin ingin mulai mengisi daya kendaraan Anda di stasiun ini?',
-                onConfirm: () => Navigator.pushNamed(context, '/charging-status'),
-              );
+            onPressed: () async {
+              final user = FirebaseAuth.instance.currentUser;
+              if (user == null) return;
+
+              // Ambil saldo terbaru dari Firestore
+              final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+              final int currentBalance = userDoc.data()?['balance'] ?? 0;
+              final int minBalance = _selectedVehicle == 1 ? 5000 : 2500;
+              final String vehicleName = _selectedVehicle == 1 ? 'Motor Listrik' : 'Sepeda Listrik';
+
+              if (currentBalance < minBalance) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
+                        children: [
+                          const Icon(Icons.warning_amber_rounded, color: Colors.white),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Saldo Anda Rp ${NumberFormat.currency(locale: 'id', symbol: '', decimalDigits: 0).format(currentBalance).trim()} kurang! Minimal Rp ${NumberFormat.currency(locale: 'id', symbol: '', decimalDigits: 0).format(minBalance).trim()} untuk $vehicleName.',
+                              style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ),
+                      backgroundColor: Colors.redAccent,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      margin: const EdgeInsets.all(24),
+                    ),
+                  );
+                }
+                return;
+              }
+
+              if (mounted) {
+                SunVoltConfirmationDialog.show(
+                  context,
+                  title: 'Konfirmasi Pengisian',
+                  message: 'Apakah Anda yakin ingin mulai mengisi daya kendaraan Anda di stasiun ini?',
+                  onConfirm: () => Navigator.pushNamed(
+                    context, 
+                    '/charging-status',
+                    arguments: _selectedVehicle == 1 ? 'motor' : 'bike',
+                  ),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryContainer,

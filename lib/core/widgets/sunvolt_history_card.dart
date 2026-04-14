@@ -10,6 +10,7 @@ class SunVoltHistoryCard extends StatelessWidget {
   final String energy;
   final String cost;
   final String status;
+  final bool isPositive;
   final EdgeInsetsGeometry? padding;
 
   const SunVoltHistoryCard({
@@ -21,11 +22,18 @@ class SunVoltHistoryCard extends StatelessWidget {
     required this.energy,
     required this.cost,
     required this.status,
+    this.isPositive = false,
     this.padding,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Warna dinamis berdasarkan tipe transaksi
+    final Color accentColor = isPositive ? AppColors.secondary : AppColors.error;
+    final Color accentBg = isPositive 
+        ? AppColors.secondaryContainer.withValues(alpha: 0.2) 
+        : AppColors.error.withValues(alpha: 0.1);
+
     return Padding(
       padding: padding ?? const EdgeInsets.symmetric(horizontal: 24),
       child: Container(
@@ -43,10 +51,10 @@ class SunVoltHistoryCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryContainer.withValues(alpha: 0.2),
+                    color: accentBg,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(icon, color: AppColors.primary, size: 24),
+                  child: Icon(icon, color: accentColor, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -75,7 +83,7 @@ class SunVoltHistoryCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.secondaryContainer.withValues(alpha: 0.3),
+                    color: accentBg,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
@@ -83,7 +91,7 @@ class SunVoltHistoryCard extends StatelessWidget {
                     style: GoogleFonts.manrope(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.secondary,
+                      color: accentColor,
                     ),
                   ),
                 ),
@@ -99,9 +107,9 @@ class SunVoltHistoryCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _detailCol(Icons.schedule, time),
-                  _detailCol(Icons.bolt, energy),
-                  _detailCol(Icons.payments, cost),
+                  _detailCol(Icons.schedule, time, null),
+                  _detailCol(Icons.bolt, energy, accentColor),
+                  _detailCol(Icons.payments, cost, accentColor),
                 ],
               ),
             ),
@@ -111,17 +119,17 @@ class SunVoltHistoryCard extends StatelessWidget {
     );
   }
 
-  Widget _detailCol(IconData icon, String text) {
+  Widget _detailCol(IconData icon, String text, Color? textColor) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: AppColors.onSurfaceVariant),
+        Icon(icon, size: 14, color: textColor ?? AppColors.onSurfaceVariant),
         const SizedBox(width: 6),
         Text(
           text,
           style: GoogleFonts.manrope(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.onSurface,
+            color: textColor ?? AppColors.onSurface,
           ),
         ),
       ],

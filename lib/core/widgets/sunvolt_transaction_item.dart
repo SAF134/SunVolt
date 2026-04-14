@@ -80,7 +80,7 @@ class SunVoltTransactionItem extends StatelessWidget {
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: isPositive ? AppColors.secondary : AppColors.onSurface,
+                    color: isPositive ? AppColors.secondary : AppColors.error,
                   ),
                 ),
                 const SizedBox(height: 2),

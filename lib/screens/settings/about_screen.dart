@@ -13,6 +13,7 @@ class AboutScreen extends StatelessWidget {
       appBar: SunVoltAppBar(
         showBackButton: true,
         title: 'Tentang Aplikasi',
+        trailing: const SizedBox.shrink(),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
@@ -71,7 +72,17 @@ class AboutScreen extends StatelessWidget {
             const SizedBox(height: 48),
             // Description
             Text(
-              'SunVolt adalah platform pengisian daya kendaraan listrik terdepan yang berkomitmen untuk mempercepat transisi energi hijau. Kami menyediakan solusi pengisian daya pintar yang cepat, aman, dan ramah lingkungan.',
+              'SunVolt adalah platform ekosistem pengisian daya kendaraan listrik revolusioner yang dirancang dengan estetika "Solar Kinetic". Kami menggabungkan teknologi pintar dengan pengalaman pengguna yang premium untuk mempercepat transisi energi hijau di Indonesia.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.manrope(
+                fontSize: 15,
+                height: 1.7,
+                color: AppColors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Dengan fitur pengisian cerdas, integrasi pembayaran real-time, dan pemantauan energi yang presisi, SunVolt memberdayakan setiap pengguna untuk berkontribusi pada masa depan yang lebih bersih dan berkelanjutan.',
               textAlign: TextAlign.center,
               style: GoogleFonts.manrope(
                 fontSize: 15,

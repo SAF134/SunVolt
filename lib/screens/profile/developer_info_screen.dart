@@ -20,7 +20,7 @@ class DeveloperInfoScreen extends StatelessWidget {
         'role': 'Mobile Developer',
         'instagram': '@saf.134',
         'whatsapp': '+62 812-9862-8236',
-        'email': 'syauqiakmal137@gmail.com',
+        'email': 'syauqiaf@student.telkomuniversity.ac.id',
         'image': 'assets/images/akmal.jpg',
       },
       {
@@ -32,7 +32,7 @@ class DeveloperInfoScreen extends StatelessWidget {
         'role': 'Hardware Developer',
         'instagram': '@fattah_ar15',
         'whatsapp': '+62 812-8073-2778',
-        'email': 'fattahar@gmail.com',
+        'email': 'fattahar@student.telkomuniversity.ac.id',
         'image': 'assets/images/fattah.jpg',
       },
       {
@@ -41,10 +41,10 @@ class DeveloperInfoScreen extends StatelessWidget {
         'faculty': 'Fakultas Teknik Elektro',
         'university': 'Universitas Telkom',
         'nim': '1103220166',
-        'role': 'Backend Developer',
+        'role': 'Embedded System Developer',
         'instagram': '@firecalm',
         'whatsapp': '+62 822-7985-1130',
-        'email': 'rizkyjh@gmail.com',
+        'email': 'rizkyjh@student.telkomuniversity.ac.id',
         'image': 'assets/images/rikzy.jpg',
       },
     ];
@@ -54,6 +54,7 @@ class DeveloperInfoScreen extends StatelessWidget {
       appBar: SunVoltAppBar(
         showBackButton: true,
         title: 'Tentang Pengembang',
+        trailing: const SizedBox.shrink(),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
@@ -112,7 +113,7 @@ class DeveloperInfoScreen extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: AppColors.primary,
+              color: AppColors.secondary,
             ),
           ),
           const SizedBox(height: 4),
@@ -139,7 +140,7 @@ class DeveloperInfoScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.secondary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(99),
             ),
             child: Text(
@@ -147,7 +148,7 @@ class DeveloperInfoScreen extends StatelessWidget {
               style: GoogleFonts.manrope(
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
-                color: AppColors.primary,
+                color: AppColors.secondary  ,
                 letterSpacing: 0.5,
               ),
             ),
@@ -237,7 +238,7 @@ class DeveloperInfoScreen extends StatelessWidget {
               ),
             );
           },
-          icon: const Icon(Icons.copy_all_rounded, color: AppColors.primary, size: 20),
+          icon: const Icon(Icons.copy_all_rounded, color: AppColors.secondary, size: 20),
         ),
       ],
     );

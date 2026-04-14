@@ -2,7 +2,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/sunvolt_app_bar.dart';
 import '../../core/widgets/sunvolt_confirmation_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 class ChargingStatusScreen extends StatefulWidget {
   const ChargingStatusScreen({super.key});
@@ -14,6 +18,40 @@ class ChargingStatusScreen extends StatefulWidget {
 class _ChargingStatusScreenState extends State<ChargingStatusScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
+
+  Future<void> _recordChargingSession() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    // Ambil data kendaraan dari arguments
+    final String vehicleType = ModalRoute.of(context)?.settings.arguments as String? ?? 'bike';
+    
+    // Logika harga dan energi
+    final int cost = vehicleType == 'motor' ? 5000 : 2500;
+    final String energy = vehicleType == 'motor' ? '2.0 kWh' : '1.0 kWh';
+    final String title = vehicleType == 'motor' ? 'Pengisian Motor Listrik' : 'Pengisian Sepeda Listrik';
+
+    try {
+      await _firestore.collection('users').doc(user.uid).update({
+        'balance': FieldValue.increment(-cost)
+      });
+
+      // Tambah ke riwayat history
+      await _firestore.collection('users').doc(user.uid).collection('activity_history').add({
+        'title': title,
+        'subtitle': 'Stasiun SunVolt',
+        'amount': '-Rp ${NumberFormat.currency(locale: 'id', symbol: '', decimalDigits: 0).format(cost).trim()}', 
+        'isPositive': false,
+        'timestamp': FieldValue.serverTimestamp(),
+        'type': 'charging',
+        'energy': energy,
+      });
+    } catch (e) {
+      debugPrint('Gagal mencatat history: $e');
+    }
+  }
 
   @override
   void initState() {
@@ -36,76 +74,8 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          // App bar
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.8),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFEAB308).withValues(alpha: 0.05),
-                  blurRadius: 4,
-                ),
-              ],
-            ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: Image.asset(
-                              'assets/images/Logo_SunVolt.png',
-                              width: 20,
-                              height: 20,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                                                RichText(
-                          text: TextSpan(
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -1,
-                            ),
-                            children: const [
-                              TextSpan(
-                                text: 'Sun',
-                                style: TextStyle(color: AppColors.yellowAccent400),
-                              ),
-                              TextSpan(
-                                text: 'Volt',
-                                style: TextStyle(color: AppColors.voltGreen),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        'Rp 10.000',
-                        style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          const SunVoltAppBar(
+            trailing: SaldoBadge(showLabel: false),
           ),
           // Content
           Expanded(
@@ -303,7 +273,12 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
                                   title: 'PERINGATAN TERAKHIR',
                                   message: 'Anda yakin ingin menghentikan pengisian daya sekarang juga?',
                                   isDestructive: true,
-                                  onConfirm: () => Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false),
+                                  onConfirm: () async {
+                                    await _recordChargingSession();
+                                    if (mounted) {
+                                      Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
+                                    }
+                                  },
                                 );
                               },
                             );

@@ -13,6 +13,7 @@ class HelpFaqScreen extends StatelessWidget {
       appBar: SunVoltAppBar(
         showBackButton: true,
         title: 'Bantuan & FAQ',
+        trailing: const SizedBox.shrink(),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -23,11 +24,23 @@ class HelpFaqScreen extends StatelessWidget {
             _buildSectionTitle('Pertanyaan Populer'),
             _buildFaqItem(
               'Bagaimana cara mengisi saldo?',
-              'Anda dapat mengisi saldo melalui menu Dompet dan memilih metode pembayaran QRIS yang tersedia.',
+              'Anda dapat mengisi saldo melalui menu Dompet dan memilih metode pembayaran QRIS yang tersedia. Saldo akan bertambah secara otomatis setelah pembayaran berhasil.',
+            ),
+            _buildFaqItem(
+              'Berapa tarif pengisian kendaraan?',
+              'Tarif disesuaikan dengan jenis kendaraan: Sepeda Listrik (Rp 2.500 per 1.0 kWh) dan Motor Listrik (Rp 5.000 per 2.0 kWh).',
+            ),
+            _buildFaqItem(
+              'Berapa saldo minimum untuk mengisi daya?',
+              'Saldo minimum harus mencukupi sesuai kendaraan: Rp 2.500 untuk Sepeda Listrik dan Rp 5.000 untuk Motor Listrik.',
+            ),
+            _buildFaqItem(
+              'Mengapa ada warna berbeda di riwayat?',
+              'Warna hijau menandakan transaksi masuk atau Top-Up (+), sedangkan warna merah menandakan transaksi keluar untuk pengisian daya (-).',
             ),
             _buildFaqItem(
               'Apa itu SunVolt Smart Charging?',
-              'Fitur pengisian cerdas yang mengoptimalkan waktu dan daya berdasarkan kebutuhan kendaraan Anda.',
+              'Fitur pengisian cerdas yang mengoptimalkan waktu dan daya berdasarkan kebutuhan kendaraan Anda untuk efisiensi maksimal.',
             ),
             _buildFaqItem(
               'Dimana lokasi stasiun pengisian?',

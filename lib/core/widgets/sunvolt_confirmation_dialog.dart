@@ -97,8 +97,8 @@ class SunVoltConfirmationDialog extends StatelessWidget {
                       onConfirm();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isDestructive ? AppColors.error : AppColors.primary,
-                      foregroundColor: Colors.white,
+                      backgroundColor: isDestructive ? AppColors.error : AppColors.sunYellow,
+                      foregroundColor: isDestructive ? Colors.white : AppColors.onSurface,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       elevation: 0,
                       shape: RoundedRectangleBorder(

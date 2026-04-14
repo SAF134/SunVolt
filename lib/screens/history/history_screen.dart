@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_app_bar.dart';
 import '../../core/widgets/sunvolt_history_card.dart';
@@ -39,38 +42,66 @@ class HistoryScreen extends StatelessWidget {
                     child: Text(
                       'Hari Ini',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 18, fontWeight: FontWeight.w700,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.onSurface,
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const SunVoltHistoryCard(icon: Icons.moped, title: 'Motor Listrik', station: 'Stasiun SunVolt', time: '14:30 - 15:45', energy: '3 kWh', cost: 'Rp 7.500', status: 'Selesai'),
-                  const SunVoltHistoryCard(icon: Icons.pedal_bike, title: 'Sepeda Listrik', station: 'Stasiun SunVolt', time: '08:15 - 09:20', energy: '2 kWh', cost: 'Rp 5.000', status: 'Selesai'),
-                  const SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Text(
-                      'Kemarin',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 18, fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                  StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(FirebaseAuth.instance.currentUser?.uid)
+                        .collection('activity_history')
+                        .orderBy('timestamp', descending: true)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red, fontSize: 10)));
+                      }
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 40),
+                            child: Text('Belum ada aktivitas pengisian daya', 
+                              style: GoogleFonts.manrope(color: AppColors.onSurface.withValues(alpha: 0.4))),
+                          ),
+                        );
+                      }
+
+                      return Column(
+                        children: snapshot.data!.docs.map((doc) {
+                          final data = doc.data() as Map<String, dynamic>;
+                          final isTopUp = data['type'] == 'topup';
+                          
+                          // Hitung energi untuk top-up berdasarkan nominal (Rp 2.500 = 1 kWh)
+                          String energyText;
+                          if (isTopUp) {
+                            final amountStr = (data['amount'] ?? '').toString().replaceAll(RegExp(r'[^0-9]'), '');
+                            final amountNum = int.tryParse(amountStr) ?? 0;
+                            final kWh = (amountNum / 2500).toStringAsFixed(1);
+                            energyText = '+$kWh kWh';
+                          } else {
+                            final rawEnergy = data['energy'] ?? '1.0 kWh';
+                            energyText = rawEnergy.toString().startsWith('-') ? rawEnergy : '-$rawEnergy';
+                          }
+
+                          return SunVoltHistoryCard(
+                            icon: isTopUp ? Icons.account_balance_wallet : (data['title']?.toString().contains('Motor') == true 
+                                ? Icons.moped : Icons.pedal_bike),
+                            title: data['title'] ?? 'Transaksi',
+                            station: data['subtitle'] ?? (isTopUp ? 'Setoran QRIS' : 'Stasiun SunVolt'),
+                            time: _formatRelativeTime(data['timestamp'] as Timestamp?),
+                            energy: energyText,
+                            cost: data['amount'] ?? 'Rp 0',
+                            status: 'Selesai',
+                            isPositive: isTopUp,
+                          );
+                        }).toList(),
+                      );
+                    },
                   ),
-                  const SizedBox(height: 12),
-                  const SunVoltHistoryCard(icon: Icons.moped, title: 'Motor Listrik', station: 'Stasiun SunVolt', time: '16:00 - 17:30', energy: '4 kWh', cost: 'Rp 10.000', status: 'Selesai'),
-                  const SunVoltHistoryCard(icon: Icons.pedal_bike, title: 'Sepeda Listrik', station: 'Stasiun SunVolt', time: '09:45 - 10:30', energy: '2 kWh', cost: 'Rp 5.000', status: 'Selesai'),
-                  const SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Text(
-                      '28 Maret 2026',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 18, fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const SunVoltHistoryCard(icon: Icons.moped, title: 'Motor Listrik', station: 'Stasiun SunVolt', time: '11:00 - 12:15', energy: '3 kWh', cost: 'Rp 7.500', status: 'Selesai'),
                   const SizedBox(height: 120),
                 ],
               ),
@@ -79,5 +110,21 @@ class HistoryScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatRelativeTime(Timestamp? timestamp) {
+    if (timestamp == null) return 'Baru saja';
+    final now = DateTime.now();
+    final date = timestamp.toDate();
+    final diff = now.difference(date);
+
+    if (diff.inMinutes < 1) return 'Baru saja';
+    if (diff.inMinutes < 60) return '${diff.inMinutes} menit yang lalu';
+    if (diff.inHours < 24) return '${diff.inHours} jam yang lalu';
+    if (diff.inDays < 7) {
+      if (diff.inDays == 1) return 'Kemarin';
+      return '${diff.inDays} hari yang lalu';
+    }
+    return DateFormat('dd MMM yyyy').format(date);
   }
 }
