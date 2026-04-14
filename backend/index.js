@@ -141,3 +141,6 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server berjalan di port ${PORT}`);
 });
+
+// Wajib untuk Vercel (Serverless Function)
+module.exports = app;
