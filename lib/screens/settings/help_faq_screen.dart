@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_app_bar.dart';
@@ -23,9 +24,6 @@ class HelpFaqScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSearchBar(),
-                  const SizedBox(height: 32),
-                  
                   _buildCategoryGrid(),
                   const SizedBox(height: 32),
 
@@ -280,47 +278,7 @@ class HelpFaqScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Hero(
-      tag: 'help_search',
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          height: 60,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.search_rounded, color: AppColors.onSurfaceVariant),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Cari solusi secara spesifik...',
-                    border: InputBorder.none,
-                    hintStyle: GoogleFonts.manrope(
-                      fontSize: 14,
-                      color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildFaqItem(String question, String answer) {
     return Container(
@@ -466,7 +424,19 @@ class HelpFaqScreen extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.outlineVariant),
+          IconButton(
+            icon: const Icon(Icons.content_copy_rounded, size: 20, color: AppColors.outlineVariant),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: value));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('$title berhasil disalin'),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: color.withValues(alpha: 0.9),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

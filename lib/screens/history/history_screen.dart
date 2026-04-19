@@ -14,9 +14,9 @@ class HistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      appBar: const SunVoltAppBar(),
       body: Column(
         children: [
-          const SunVoltAppBar(),
           Expanded(
             child: SingleChildScrollView(
               child: Column(

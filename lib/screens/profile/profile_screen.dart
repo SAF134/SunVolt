@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_confirmation_dialog.dart';
+import '../../core/widgets/sunvolt_app_bar.dart';
 import '../../core/services/auth_service.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -18,56 +19,11 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      appBar: const SunVoltAppBar(
+        trailing: SizedBox.shrink(),
+      ),
       body: Column(
         children: [
-          // App bar
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.8),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFEAB308).withValues(alpha: 0.05),
-                  blurRadius: 4,
-                ),
-              ],
-            ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Row(
-                  children: [
-                    Image.asset(
-                      'assets/images/Logo_SunVolt.png',
-                      width: 32,
-                      height: 32,
-                      fit: BoxFit.contain,
-                    ),
-                    const SizedBox(width: 4),
-                    RichText(
-                      text: TextSpan(
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                        ),
-                        children: const [
-                          TextSpan(
-                            text: 'Sun',
-                            style: TextStyle(color: AppColors.yellowAccent400),
-                          ),
-                          TextSpan(
-                            text: 'Volt',
-                            style: TextStyle(color: AppColors.voltGreen),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -208,7 +164,7 @@ class ProfileScreen extends StatelessWidget {
                           confirmLabel: 'Ya',
                           cancelLabel: 'Tidak',
                           onConfirm: () async {
-                            final Uri url = Uri.parse('https://lms.telkomuniversity.ac.id/login/index.php');
+                            final Uri url = Uri.parse('https://sunvolt-admin.vercel.app');
                             await launchUrl(url, mode: LaunchMode.externalApplication);
                           },
                         );
@@ -269,11 +225,7 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Versi 1.0.0',
-                    style: GoogleFonts.manrope(fontSize: 12, color: AppColors.onSurfaceVariant),
-                  ),
+
                   const SizedBox(height: 120),
                 ],
               ),

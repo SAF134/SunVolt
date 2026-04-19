@@ -24,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1000),
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
@@ -35,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.forward();
 
     // Animate loading bar
-    _timer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
+    _timer = Timer.periodic(const Duration(milliseconds: 15), (timer) {
       if (_loadingProgress >= 1.0) {
         timer.cancel();
         _checkAuthAndNavigate();

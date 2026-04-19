@@ -10,13 +10,13 @@ class AboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      appBar: SunVoltAppBar(
+        showBackButton: true,
+        title: 'Tentang Aplikasi',
+        trailing: const SizedBox.shrink(),
+      ),
       body: Column(
         children: [
-          SunVoltAppBar(
-            showBackButton: true,
-            title: 'Tentang Aplikasi',
-            trailing: const SizedBox.shrink(),
-          ),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),

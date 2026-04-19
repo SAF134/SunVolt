@@ -216,10 +216,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        side: BorderSide(
-                          color: AppColors.onSurfaceVariant.withValues(alpha: 0.1),
+                        side: const BorderSide(
+                          color: AppColors.primaryContainer,
                         ),
-                        backgroundColor: Colors.white.withValues(alpha: 0.5),
+                        backgroundColor: AppColors.primaryContainer,
                       ),
                       child: _isLoading
                           ? const SizedBox(
@@ -234,14 +234,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                   'assets/images/google.png',
                                   height: 24,
                                   errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(Icons.g_mobiledata, size: 24),
+                                      const Icon(Icons.g_mobiledata, size: 30),
                                 ),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: 10),
                                 Text(
                                   'Masuk dengan Akun Google',
                                   style: GoogleFonts.manrope(
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.onSurface,
+                                    color: AppColors.onPrimary,
                                   ),
                                 ),
                               ],
