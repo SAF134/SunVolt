@@ -51,6 +51,15 @@ class AuthService {
         await _ensureUserDocument(userCredential.user!);
       }
       return userCredential.user;
+    } on GoogleSignInException catch (e) {
+      // User membatalkan login — bukan error sesungguhnya
+      if (e.code == GoogleSignInExceptionCode.canceled ||
+          e.code == GoogleSignInExceptionCode.interrupted) {
+        debugPrint('Google Sign-In dibatalkan oleh user.');
+        return null;
+      }
+      debugPrint('GoogleSignInException: ${e.code} - ${e.description}');
+      rethrow;
     } catch (e) {
       debugPrint('Error signing in with Google: $e');
       rethrow;
