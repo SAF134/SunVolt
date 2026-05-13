@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_app_bar.dart';
 import '../../core/widgets/sunvolt_history_card.dart';
+import '../../core/widgets/sunvolt_shimmer.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -46,6 +47,14 @@ class HistoryScreen extends StatelessWidget {
                       if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red, fontSize: 10)));
                       }
+                      
+                      // Menampilkan Shimmer Skeleton Loading
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Column(
+                          children: List.generate(4, (index) => const SunVoltHistorySkeleton()),
+                        );
+                      }
+
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                         return Center(
                           child: Padding(

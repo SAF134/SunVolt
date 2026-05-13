@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_app_bar.dart';
 import '../../core/widgets/sunvolt_confirmation_dialog.dart';
+import '../../core/widgets/sunvolt_shimmer.dart';
 import '../payment/payment_success_screen.dart';
 
 class WalletScreen extends StatefulWidget {
@@ -174,9 +175,11 @@ class _WalletScreenState extends State<WalletScreen> {
                               ),
                             ],
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                          child: snapshot.connectionState == ConnectionState.waiting
+                              ? const SunVoltWalletBalanceSkeleton()
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
