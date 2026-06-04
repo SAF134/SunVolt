@@ -12,6 +12,7 @@ class SunVoltHistoryCard extends StatelessWidget {
   final String status;
   final bool isPositive;
   final EdgeInsetsGeometry? padding;
+  final VoidCallback? onDelete;
 
   const SunVoltHistoryCard({
     super.key,
@@ -24,6 +25,7 @@ class SunVoltHistoryCard extends StatelessWidget {
     required this.status,
     this.isPositive = false,
     this.padding,
+    this.onDelete,
   });
 
   @override
@@ -95,6 +97,20 @@ class SunVoltHistoryCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (onDelete != null) ...[
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: onDelete,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 16),
+                    ),
+                  ),
+                ],
               ],
             ),
             const SizedBox(height: 16),

@@ -87,6 +87,10 @@ class HelpFaqScreen extends StatelessWidget {
                     'Tidak perlu khawatir. SunVolt Smart System akan menghentikan aliran listrik secara otomatis saat biaya berjalan telah mencapai batas saldo Anda. Anda tidak akan pernah dicharge melebihi saldo yang dimiliki.',
                   ),
                   _buildFaqItem(
+                    'Bagaimana sistem memonitor daya secara akurat?',
+                    'Stasiun SunVolt terintegrasi dengan perangkat IoT (Internet of Things) menggunakan Mikrokontroler ESP32 dan Sensor Arus ACS712. Pemakaian arus dibaca secara presisi setiap detiknya dan dikirim ke aplikasi Anda secara real-time melalui server Firebase.',
+                  ),
+                  _buildFaqItem(
                     'Profil pengisian CC-CV itu apa?',
                     'CC-CV adalah singkatan dari Constant Current (Arus Konstan) dan Constant Voltage (Tegangan Konstan). Mesin akan mengisi arus maksimal saat baterai masih kosong (CC), dan perlahan menurunkan arus saat baterai hampir penuh (CV) untuk melindungi sel baterai agar lebih awet.',
                   ),

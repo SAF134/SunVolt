@@ -1,0 +1,145 @@
+
+  ═══════════════════════════════════════════════════════════════
+   SunVolt ESP32 — Sensor Arus ke Firebase Firestore
+  ═══════════════════════════════════════════════════════════════
+ 
+   ALUR KERJA
+   1. ESP32 membaca sensor arus (ACS712) dari pin analog
+   2. Data arus (Ampere) dikirim ke Firebase Firestore
+      → Collection stations  Document station_1
+   3. Aplikasi Flutter SunVolt membaca data tersebut secara
+      real-time dan menghitung Daya & Tarif
+ 
+   LIBRARY YANG DIBUTUHKAN (Install via Arduino IDE)
+   - Firebase ESP Client by Mobizt  (versi 4.x)
+     → Buka Arduino IDE  Tools  Manage Libraries
+     → Cari Firebase ESP Client oleh Mobizt
+     → Klik Install
+ 
+   BOARD SETTING
+   - Board ESP32 Dev Module
+   - Upload Speed 115200
+ 
+#include WiFi.h
+#include Firebase_ESP_Client.h
+ ─── Token Generation Helper ───
+#include addonsTokenHelper.h
+#include addonsRTDBHelper.h
+ ═══════════════════════════════════════════════════════════════
+  KONFIGURASI — WAJIB DIISI OLEH ANDA
+ ═══════════════════════════════════════════════════════════════
+ WiFi — Ganti dengan SSID dan Password WiFi Anda
+#define WIFI_SSID     POCO X8 Pro Max
+#define WIFI_PASSWORD akmal123
+ Firebase — Sudah terisi dari konfigurasi proyek SunVolt Anda
+#define API_KEY       AIzaSyCRM-pCZBw-Pu0sSD8LzrFizZLDY44HsZw
+#define FIREBASE_PROJECT_ID sunvolt-38cf9
+ Email & Password untuk autentikasi ESP32 ke Firebase
+ Anda perlu membuat akun khusus ini di Firebase Console
+ → Authentication → Add User → email esp32@sunvolt.com, password sunvolt123
+#define USER_EMAIL    esp32@sunvolt.com
+#define USER_PASSWORD sunvolt123
+ ═══════════════════════════════════════════════════════════════
+  PIN & SENSOR
+ ═══════════════════════════════════════════════════════════════
+const int CURRENT_PIN = 34;   Pin analog sensor arus ACS712
+const int ZERO_POINT  = 2797;  Kalibrasi titik nol (ganti sesuai sensor Anda)
+ Sensitivity ACS712
+ - Modul  5A → 0.185
+ - Modul 20A → 0.100
+ - Modul 30A → 0.066
+const float SENSITIVITY = 0.185;
+ ═══════════════════════════════════════════════════════════════
+  VARIABEL GLOBAL
+ ═══════════════════════════════════════════════════════════════
+FirebaseData fbdo;
+FirebaseAuth auth;
+FirebaseConfig config;
+unsigned long lastSendTime = 0;
+const unsigned long SEND_INTERVAL = 5000;  Kirim data setiap 2 detik
+bool firebaseReady = false;
+ ═══════════════════════════════════════════════════════════════
+  SETUP
+ ═══════════════════════════════════════════════════════════════
+void setup() {
+  Serial.begin(115200);
+  pinMode(CURRENT_PIN, INPUT);
+   ── Koneksi WiFi ──
+  Serial.println();
+  Serial.print(Menghubungkan ke WiFi );
+  Serial.println(WIFI_SSID);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(.);
+    delay(500);
+  }
+  Serial.println();
+  Serial.println(✅ WiFi Terhubung!);
+  Serial.print(   IP Address );
+  Serial.println(WiFi.localIP());
+   ── Konfigurasi Firebase ──
+  config.api_key = API_KEY;
+  auth.user.email = USER_EMAIL;
+  auth.user.password = USER_PASSWORD;
+  config.token_status_callback = tokenStatusCallback;  dari TokenHelper.h
+   Inisialisasi Firebase
+  Firebase.begin(&config, &auth);
+  Firebase.reconnectNetwork(true);
+   Tunggu hingga autentikasi berhasil
+  Serial.print(Menghubungkan ke Firebase...);
+  while (auth.token.uid == ) {
+    Serial.print(.);
+    delay(500);
+  }
+  Serial.println();
+  Serial.println(✅ Firebase Terhubung!);
+  Serial.print(   User UID );
+  Serial.println(auth.token.uid.c_str());
+  firebaseReady = true;
+}
+ ═══════════════════════════════════════════════════════════════
+  LOOP
+ ═══════════════════════════════════════════════════════════════
+void loop() {
+  unsigned long currentMillis = millis();
+  if (currentMillis - lastSendTime = SEND_INTERVAL) {
+    lastSendTime = currentMillis;
+     ── 1. Baca Sensor Arus ──
+    int rawAnalog = analogRead(CURRENT_PIN);
+    float voltageDiff = ((rawAnalog - ZERO_POINT)  4095.0)  3.3;
+    float currentAmps = voltageDiff  SENSITIVITY;
+     Pastikan tidak negatif (noise saat idle)
+    if (currentAmps  0.05) currentAmps = 0.0;
+     ── 2. Tampilkan di Serial Monitor ──
+    Serial.println(─── [SENSOR READOUT] ───);
+    Serial.print(Raw Analog   ); Serial.println(rawAnalog);
+    Serial.print(Arus         ); Serial.print(currentAmps, 2); Serial.println( A);
+     ── 3. Kirim ke Firebase Firestore ──
+    if (Firebase.ready() && firebaseReady) {
+       Buat dokumen JSON untuk Firestore
+      FirebaseJson content;
+       Field current_amps (tipe doubleValue)
+      content.set(fieldscurrent_ampsdoubleValue, String(currentAmps, 2));
+       Field is_active (tipe booleanValue) — menandakan ESP32 online
+      content.set(fieldsis_activebooleanValue, true);
+       Kirim ke Firestore stationsstation_1
+      String documentPath = stationsstation_1;
+      if (Firebase.Firestore.patchDocument(
+            &fbdo,
+            FIREBASE_PROJECT_ID,
+            ,                     databaseId kosong = (default)
+            documentPath.c_str(),
+            content.raw(),
+            current_amps,is_active  updateMask field mana yg di-update
+          )) {
+        Serial.println(✅ Data terkirim ke Firebase!);
+      } else {
+        Serial.print(❌ Gagal kirim );
+        Serial.println(fbdo.errorReason());
+      }
+    } else {
+      Serial.println(⏳ Firebase belum siap...);
+    }
+    Serial.println();
+  }
+}

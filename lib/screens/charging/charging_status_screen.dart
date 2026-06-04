@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
@@ -22,43 +21,34 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
   late AnimationController _pulseController;
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
-  final _random = Random();
   final _currencyFormat = NumberFormat.currency(
     locale: 'id', symbol: '', decimalDigits: 0,
   );
 
   Timer? _chargingTimer;
+  StreamSubscription? _sensorSubscription;
   bool _initialized = false;
   bool _hasRecorded = false;
   bool _stoppedByBalance = false;
   int _userBalance = 0;
 
-  bool _notified80Percent = false;
-  bool _notified100Percent = false;
   bool _notified1MinRemaining = false;
 
   // ─── Spesifikasi Kendaraan ───
   late String _vehicleType;
-  late double _totalCapacityKWh;
-  late double _chargingDurationSeconds; // durasi 15% → 100%
-  late double _percentPerSecond;
-  late double _baseVoltage;
-  late double _baseCurrent;
+  late double _fixedVoltage; // 54.6V untuk sepeda (DC), 220V untuk motor (AC)
 
   // ─── Status Pengisian ───
-  double _batteryPercent = 15.0;
-  static const double _startPercent = 15.0;
   bool _isCharging = true;
   bool _isComplete = false;
   int _elapsedSeconds = 0;
 
-  // ─── Nilai Elektrik Real-time ───
-  double _currentVoltage = 0.0;
-  double _currentCurrent = 0.0;
-  double _currentPower = 0.0;
+  // ─── Nilai Elektrik Real-time (dari ESP32 via Firebase) ───
+  double _currentAmps = 0.0;   // Arus dari ESP32
+  double _currentPower = 0.0;  // Daya = Arus × Tegangan
 
   // ─── Finansial ───
-  double _energyConsumedKWh = 0.0;
+  double _energyConsumedWh = 0.0;  // Akumulasi energi dalam Watt-hour
   double _currentTariff = 0.0;
   static const double _tariffPerKWh = 2500.0;
 
@@ -92,31 +82,41 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
       _userBalance = doc.data()?['balance'] ?? 0;
     }
 
+    // Tetapkan tegangan sesuai jenis kendaraan
     if (_vehicleType == 'motor') {
-      // Motor listrik: 72V × 30Ah = 2.16 kWh
-      _totalCapacityKWh = 2.16;
-      _chargingDurationSeconds = 15 * 60.0; // 15 menit
-      _baseVoltage = 76.0;  // sedikit di atas nominal 72 V
-      _baseCurrent = 3.00;
+      _fixedVoltage = 220.0;  // Motor listrik: Output AC 220V
     } else {
-      // Sepeda listrik: 48V × 20Ah = 0.96 kWh
-      _totalCapacityKWh = 0.96;
-      _chargingDurationSeconds = 10 * 60.0; // 10 menit
-      _baseVoltage = 52.0;  // sedikit di atas nominal 48 V
-      _baseCurrent = 1.91;
+      _fixedVoltage = 54.6;   // Sepeda listrik: Output DC 54.6V
     }
 
-    // Kecepatan pengisian: 85% dalam durasi total (dari 15% ke 100%)
-    _percentPerSecond = 85.0 / _chargingDurationSeconds;
+    // Mulai mendengarkan data arus dari ESP32 melalui Firebase
+    _startListeningToSensor();
 
-    // Nilai awal
-    _updateElectricalValues();
-
-    // Mulai timer simulasi (setiap detik)
+    // Mulai timer waktu (setiap detik)
     _chargingTimer = Timer.periodic(
       const Duration(seconds: 1),
       _onChargingTick,
     );
+  }
+
+  /// Mendengarkan data arus dari ESP32 secara real-time melalui Firebase
+  void _startListeningToSensor() {
+    _sensorSubscription = _firestore
+        .collection('stations')
+        .doc('station_1')
+        .snapshots()
+        .listen((snapshot) {
+      if (!mounted || _isComplete) return;
+
+      final data = snapshot.data();
+      if (data != null && data.containsKey('current_amps')) {
+        setState(() {
+          _currentAmps = (data['current_amps'] as num).toDouble();
+          // Daya (Watt) = Arus (A) × Tegangan (V)
+          _currentPower = _currentAmps * _fixedVoltage;
+        });
+      }
+    });
   }
 
   /// Dipanggil setiap detik selama pengisian berlangsung
@@ -128,24 +128,24 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
 
     setState(() {
       _elapsedSeconds++;
-      _batteryPercent =
-          (_startPercent + _percentPerSecond * _elapsedSeconds).clamp(0.0, 100.0);
 
-      _updateElectricalValues();
+      // Akumulasi energi: Daya (W) × waktu (1 detik) = Watt-second → konversi ke Wh
+      _energyConsumedWh += _currentPower / 3600.0;
 
-      // Hitung energi yang terpakai & tarif berjalan
-      _energyConsumedKWh =
-          (_batteryPercent - _startPercent) / 100.0 * _totalCapacityKWh;
-      _currentTariff = _energyConsumedKWh * _tariffPerKWh;
+      // Tarif berjalan (Rp) = Energi (kWh) × Tarif per kWh
+      _currentTariff = (_energyConsumedWh / 1000.0) * _tariffPerKWh;
+
+      // Update data monitoring ke Firebase (setiap 5 detik)
+      if (_elapsedSeconds % 5 == 0) {
+        _updateRealTimeData();
+      }
 
       // Cek apakah tarif sudah mencapai saldo pengguna
       if (_currentTariff.round() >= _userBalance && _userBalance > 0) {
         _currentTariff = _userBalance.toDouble();
-        _energyConsumedKWh = _currentTariff / _tariffPerKWh;
         _isComplete = true;
         _isCharging = false;
         _stoppedByBalance = true;
-        _currentCurrent = 0.0;
         _currentPower = 0.0;
         _pulseController.stop();
         timer.cancel();
@@ -156,9 +156,9 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
         return;
       }
 
-      // Notifikasi Saldo Menipis (<= 60 Detik)
-      if (!_notified1MinRemaining && !_isComplete) {
-        double tariffPerSecond = _percentPerSecond / 100.0 * _totalCapacityKWh * _tariffPerKWh;
+      // Notifikasi Saldo Menipis (<= 60 Detik estimasi)
+      if (!_notified1MinRemaining && !_isComplete && _currentPower > 0) {
+        double tariffPerSecond = (_currentPower / 3600.0 / 1000.0) * _tariffPerKWh;
         int remainingBalance = _userBalance - _currentTariff.round();
         if (tariffPerSecond > 0) {
           double secondsLeft = remainingBalance / tariffPerSecond;
@@ -173,83 +173,31 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
           }
         }
       }
-
-      // Notifikasi Baterai 80% (Fase CV)
-      if (_batteryPercent >= 80.0 && !_notified80Percent) {
-        _notified80Percent = true;
-        _showLocalNotification(
-          'Baterai 80%',
-          'Pengisian daya mencapai 80%. Arus listrik mulai diturunkan untuk menjaga keawetan kesehatan baterai (Fase Constant Voltage).',
-          Icons.battery_charging_full_rounded,
-          AppColors.secondary,
-        );
-      }
-
-      // Cek apakah pengisian selesai (baterai penuh)
-      if (_batteryPercent >= 100.0) {
-        _batteryPercent = 100.0;
-        _isComplete = true;
-        _isCharging = false;
-        _currentCurrent = 0.0;
-        _currentPower = 0.0;
-        // Tarif final
-        _energyConsumedKWh = 85.0 / 100.0 * _totalCapacityKWh;
-        _currentTariff = _energyConsumedKWh * _tariffPerKWh;
-        _pulseController.stop();
-        timer.cancel();
-
-        if (!_notified100Percent) {
-          _notified100Percent = true;
-          _showLocalNotification(
-            'Baterai Penuh',
-            'Kendaraan Anda telah terisi 100% dan siap menempuh perjalanan selanjutnya!',
-            Icons.check_circle_rounded,
-            AppColors.secondary,
-          );
-        }
-
-        // Otomatis catat sesi setelah frame selesai
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _recordAndFinalize();
-        });
-      }
     });
   }
 
-  /// Perbarui nilai tegangan, arus, dan daya dengan fluktuasi realistis
-  void _updateElectricalValues() {
-    if (_isComplete) return;
-
-    double progress = (_batteryPercent - _startPercent) / 85.0;
-
-    // Tegangan naik sedikit saat baterai terisi (profil CC-CV)
-    double voltageRise = progress * 4.0;
-    _currentVoltage =
-        _baseVoltage + voltageRise + (_random.nextDouble() - 0.5) * 1.0;
-
-    // Arus: konstan di fase CC, berkurang di fase CV (> 80% SoC)
-    double currentMultiplier = 1.0;
-    if (_batteryPercent > 80.0) {
-      double cvProgress = (_batteryPercent - 80.0) / 20.0;
-      currentMultiplier = 1.0 - cvProgress * 0.6; // turun hingga 40%
+  /// Mengirim data monitoring (daya, waktu, tarif) ke Firebase
+  Future<void> _updateRealTimeData() async {
+    try {
+      await _firestore.collection('stations').doc('station_1').set({
+        'power_watts': _currentPower,
+        'elapsed_seconds': _elapsedSeconds,
+        'current_tariff': _currentTariff.round(),
+        'vehicle_type': _vehicleType,
+        'last_updated': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Gagal mengirim data real-time: $e');
     }
-    _currentCurrent = _baseCurrent * currentMultiplier +
-        (_random.nextDouble() - 0.5) * 0.08;
-    _currentCurrent = _currentCurrent.clamp(0.1, _baseCurrent * 1.1);
-
-    // Daya = V × I
-    _currentPower = _currentVoltage * _currentCurrent;
   }
 
-  /// Teks estimasi sisa waktu
-  String _getRemainingTimeText() {
-    if (_isComplete && _stoppedByBalance) return 'Saldo habis';
-    if (_isComplete) return 'Pengisian selesai!';
-    double remainingPercent = 100.0 - _batteryPercent;
-    if (_percentPerSecond <= 0) return '—';
-    int remainingMinutes = (remainingPercent / _percentPerSecond / 60).ceil();
-    if (remainingMinutes <= 0) return 'Hampir selesai...';
-    return '$remainingMinutes menit lagi';
+  /// Teks waktu yang berjalan
+  String _getElapsedTimeText() {
+    if (_isComplete && _stoppedByBalance) return 'Dihentikan';
+    if (_isComplete) return 'Selesai';
+    int minutes = _elapsedSeconds ~/ 60;
+    int seconds = _elapsedSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
 
@@ -309,12 +257,10 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
     if (user == null) return;
 
     _chargingTimer?.cancel();
+    _sensorSubscription?.cancel();
 
-    // Hitung ulang final
-    _energyConsumedKWh =
-        (_batteryPercent - _startPercent) / 100.0 * _totalCapacityKWh;
-    _currentTariff = _energyConsumedKWh * _tariffPerKWh;
     final int tariffAmount = _currentTariff.round();
+    final double energyKWh = _energyConsumedWh / 1000.0;
 
     final String title = _vehicleType == 'motor'
         ? 'Pengisian Motor Listrik'
@@ -339,8 +285,18 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
         'isPositive': false,
         'timestamp': FieldValue.serverTimestamp(),
         'type': 'charging',
-        'energy': '${_energyConsumedKWh.toStringAsFixed(2)} kWh',
+        'energy': '${energyKWh.toStringAsFixed(2)} kWh',
+        'duration_seconds': _elapsedSeconds,
       });
+
+      // Reset status station di Firebase
+      await _firestore.collection('stations').doc('station_1').set({
+        'power_watts': 0,
+        'elapsed_seconds': 0,
+        'current_tariff': 0,
+        'vehicle_type': '',
+        'last_updated': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
     } catch (e) {
       debugPrint('Gagal mencatat sesi pengisian: $e');
     }
@@ -349,6 +305,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
   @override
   void dispose() {
     _chargingTimer?.cancel();
+    _sensorSubscription?.cancel();
     _pulseController.dispose();
     super.dispose();
   }
@@ -443,15 +400,16 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
                                 ),
                               ),
                             ],
-                            // Ring progress
-                            CustomPaint(
-                              size: const Size(280, 280),
-                              painter: _RingPainter(
-                                progress: _batteryPercent / 100.0,
-                                backgroundColor:
-                                    AppColors.surfaceContainerHigh,
-                                progressColor: AppColors.secondary,
-                                strokeWidth: 12,
+                            // Ring outline statis (tanpa animasi progress)
+                            Container(
+                              width: 280,
+                              height: 280,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: AppColors.surfaceContainerHigh,
+                                  width: 12,
+                                ),
                               ),
                             ),
                             // Konten tengah
@@ -461,38 +419,22 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
                                 Icon(
                                   _isComplete
                                       ? Icons.check_circle
-                                      : Icons.battery_charging_full,
-                                  size: 56,
+                                      : Icons.timer,
+                                  size: 48,
                                   color: AppColors.secondary,
                                 ),
-                                const SizedBox(height: 8),
-                                RichText(
-                                  text: TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text:
-                                            '${_batteryPercent.toInt()}',
-                                        style:
-                                            GoogleFonts.plusJakartaSans(
-                                          fontSize: 56,
-                                          fontWeight: FontWeight.w800,
-                                          color: AppColors.onSurface,
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text: '%',
-                                        style:
-                                            GoogleFonts.plusJakartaSans(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.w700,
-                                          color: AppColors.onSurface,
-                                        ),
-                                      ),
-                                    ],
+                                const SizedBox(height: 12),
+                                Text(
+                                  _getElapsedTimeText(),
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 56,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.onSurface,
                                   ),
                                 ),
+                                const SizedBox(height: 4),
                                 Text(
-                                  _getRemainingTimeText(),
+                                  'Waktu Berjalan',
                                   style: GoogleFonts.manrope(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
@@ -571,7 +513,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '${_energyConsumedKWh.toStringAsFixed(2)} kWh terpakai • Rp ${_tariffPerKWh.toInt()}/kWh',
+                              '${(_energyConsumedWh / 1000.0).toStringAsFixed(2)} kWh terpakai • Rp ${_tariffPerKWh.toInt()}/kWh',
                                 style: GoogleFonts.manrope(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
@@ -695,29 +637,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Tegangan & Arus ──
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _dataCard(
-                          'TEGANGAN',
-                          _currentVoltage.toStringAsFixed(2),
-                          'V',
-                          Icons.flash_on_rounded,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _dataCard(
-                          'ARUS',
-                          _currentCurrent.toStringAsFixed(2),
-                          'A',
-                          Icons.speed_rounded,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
+
 
                   // ── Tombol Aksi ──
                   SizedBox(
@@ -782,7 +702,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
       context,
       title: 'Berhenti Mengisi Daya?',
       message:
-          'Pengisian daya saat ini di ${_batteryPercent.toInt()}%. '
+          'Pengisian daya sudah berjalan ${_elapsedSeconds ~/ 60} menit ${_elapsedSeconds % 60} detik. '
           'Tarif yang akan dikenakan: Rp ${_currencyFormat.format(_currentTariff.round()).trim()}. '
           'Apakah Anda yakin ingin berhenti?',
       isDestructive: true,
@@ -810,116 +730,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
     );
   }
 
-  // ─── Helper Widget ───
 
-  Widget _dataCard(String label, String value, String unit, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      height: 120,
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.manrope(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1,
-              color: AppColors.onSurfaceVariant,
-            ),
-          ),
-          Row(
-            children: [
-              Icon(
-                icon,
-                color: AppColors.secondary,
-                size: 20,
-              ),
-              const SizedBox(width: 6),
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: value,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.onSurface,
-                      ),
-                    ),
-                    TextSpan(
-                      text: ' $unit',
-                      style: GoogleFonts.manrope(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-//  RING PAINTER
-// ═══════════════════════════════════════════════════════════════════
 
-class _RingPainter extends CustomPainter {
-  final double progress;
-  final Color backgroundColor;
-  final Color progressColor;
-  final double strokeWidth;
-
-  _RingPainter({
-    required this.progress,
-    required this.backgroundColor,
-    required this.progressColor,
-    required this.strokeWidth,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width - strokeWidth) / 2;
-
-    // Background ring
-    final bgPaint = Paint()
-      ..color = backgroundColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawCircle(center, radius, bgPaint);
-
-    // Progress arc
-    final progressPaint = Paint()
-      ..color = progressColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -pi / 2,
-      2 * pi * progress,
-      false,
-      progressPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _RingPainter oldDelegate) {
-    return oldDelegate.progress != progress;
-  }
-}

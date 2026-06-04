@@ -7,6 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_app_bar.dart';
 import '../../core/widgets/sunvolt_history_card.dart';
 import '../../core/widgets/sunvolt_shimmer.dart';
+import '../../core/widgets/sunvolt_confirmation_dialog.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -59,7 +60,7 @@ class HistoryScreen extends StatelessWidget {
                         return Center(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 40),
-                            child: Text('Belum ada aktivitas pengisian daya', 
+                            child: Text('Belum ada riwayat aktivitas', 
                               style: GoogleFonts.manrope(color: AppColors.onSurface.withValues(alpha: 0.4))),
                           ),
                         );
@@ -92,6 +93,30 @@ class HistoryScreen extends StatelessWidget {
                             cost: data['amount'] ?? 'Rp 0',
                             status: 'Selesai',
                             isPositive: isTopUp,
+                            onDelete: () {
+                              showDialog(
+                                context: context,
+                                builder: (ctx) => SunVoltConfirmationDialog(
+                                  title: 'Hapus Riwayat',
+                                  message: 'Apakah Anda yakin ingin menghapus riwayat aktivitas ini? Data akan terhapus secara permanen dari aplikasi dan database.',
+                                  confirmLabel: 'Ya, Hapus',
+                                  cancelLabel: 'Batal',
+                                  isDestructive: true,
+                                  onConfirm: () async {
+                                    try {
+                                      await FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(FirebaseAuth.instance.currentUser?.uid)
+                                          .collection('activity_history')
+                                          .doc(doc.id)
+                                          .delete();
+                                    } catch (e) {
+                                      debugPrint('Error deleting history: $e');
+                                    }
+                                  },
+                                ),
+                              );
+                            },
                           );
                         }).toList(),
                       );

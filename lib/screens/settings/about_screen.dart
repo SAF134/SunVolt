@@ -121,13 +121,13 @@ class AboutScreen extends StatelessWidget {
 
 
                   // Tech Stack & Info
-                  _buildSectionTitle('Informasi Sistem'),
+                  _buildSectionTitle('Sistem & Hardware'),
                   const SizedBox(height: 16),
                   _buildInfoCard([
-                    _infoEntry('Framework', 'Flutter v3.22 (Cross-Platform)'),
-                    _infoEntry('Database', 'Firebase Ecosystem (Firestore)'),
-                    _infoEntry('API Terhubung', 'Midtrans Sandbox Gateway'),
-                    _infoEntry('Lisensi', 'Apache License 2.0 (Open Source)'),
+                    _infoEntry('Software', 'Flutter & Firebase Ecosystem'),
+                    _infoEntry('Microcontroller', 'ESP32 Dev Module (IoT)'),
+                    _infoEntry('Sensor Kelistrikan', 'ACS712 (Real-time Current)'),
+                    _infoEntry('Protokol', 'Wi-Fi ke Cloud Firestore'),
                   ]),
 
                   const SizedBox(height: 64),
