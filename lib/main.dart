@@ -7,6 +7,21 @@ import 'core/navigation/app_router.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  
+  // Inisialisasi Firebase Kedua (sunvolt-admin)
+  await Firebase.initializeApp(
+    name: 'secondary',
+    options: const FirebaseOptions(
+      apiKey: "AIzaSyApn4txSJN29ZRle9hOqMli0zfkya8Uh-Q",
+      authDomain: "sunvolt-admin.firebaseapp.com",
+      projectId: "sunvolt-admin",
+      storageBucket: "sunvolt-admin.firebasestorage.app",
+      messagingSenderId: "759944928251",
+      appId: "1:759944928251:web:602607c4d46d04bf86c95e",
+      measurementId: "G-Y6X03PP9EV",
+    ),
+  );
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,

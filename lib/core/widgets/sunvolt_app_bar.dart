@@ -160,7 +160,7 @@ class SaldoBadge extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: AppColors.primaryContainer.withValues(alpha: 0.1),
+            color: AppColors.secondary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(999),
           ),
           child: Row(
@@ -172,20 +172,20 @@ class SaldoBadge extends StatelessWidget {
                   style: GoogleFonts.manrope(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.onPrimaryContainer.withValues(alpha: 0.6),
+                    color: AppColors.secondary.withValues(alpha: 0.6),
                     letterSpacing: 1.5,
                   ),
                 ),
                 const SizedBox(width: 8),
               ],
-              const Icon(Icons.account_balance_wallet_rounded, color: Color(0xFFEAB308), size: 16),
+              const Icon(Icons.account_balance_wallet_rounded, color: AppColors.secondary, size: 16),
               const SizedBox(width: 4),
               Text(
                 balanceText,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.onPrimaryContainer,
+                  color: AppColors.secondary,
                 ),
               ),
             ],
@@ -218,20 +218,20 @@ class BalanceBadgeCompact extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: AppColors.primaryContainer.withValues(alpha: 0.1),
+            color: AppColors.secondary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(999),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.account_balance_wallet_rounded, color: Color(0xFFEAB308), size: 16),
+              const Icon(Icons.account_balance_wallet_rounded, color: AppColors.secondary, size: 16),
               const SizedBox(width: 4),
               Text(
                 balanceText,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.onPrimaryContainer,
+                  color: AppColors.secondary,
                 ),
               ),
             ],

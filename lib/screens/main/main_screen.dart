@@ -43,7 +43,7 @@ class _MainScreenState extends State<MainScreen> {
       },
       child: Scaffold(
         extendBody: true,
-        body: IndexedStack(
+        body: AnimatedIndexedStack(
           index: _currentIndex,
           children: _screens,
         ),
@@ -52,6 +52,96 @@ class _MainScreenState extends State<MainScreen> {
           onTap: (index) => setState(() => _currentIndex = index),
         ),
       ),
+    );
+  }
+}
+
+class AnimatedIndexedStack extends StatefulWidget {
+  final int index;
+  final List<Widget> children;
+
+  const AnimatedIndexedStack({
+    super.key,
+    required this.index,
+    required this.children,
+  });
+
+  @override
+  State<AnimatedIndexedStack> createState() => _AnimatedIndexedStackState();
+}
+
+class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late int _oldIndex;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _oldIndex = widget.index;
+    _currentIndex = widget.index;
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _controller.forward();
+  }
+
+  @override
+  void didUpdateWidget(AnimatedIndexedStack oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.index != _currentIndex) {
+      _oldIndex = _currentIndex;
+      _currentIndex = widget.index;
+      _controller.reset();
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final curvedAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOutCubic,
+    );
+
+    return AnimatedBuilder(
+      animation: curvedAnimation,
+      builder: (context, child) {
+        final bool isMovingRight = _currentIndex > _oldIndex;
+        final double value = curvedAnimation.value;
+
+        return Stack(
+          children: List.generate(widget.children.length, (index) {
+            if (index == _currentIndex) {
+              final Offset slideInOffset = isMovingRight
+                  ? Offset(1.0 - value, 0.0)
+                  : Offset(-1.0 + value, 0.0);
+              return FractionalTranslation(
+                translation: slideInOffset,
+                child: widget.children[index],
+              );
+            } else if (index == _oldIndex && !_controller.isCompleted) {
+              final Offset slideOutOffset = isMovingRight
+                  ? Offset(0.0 - value, 0.0)
+                  : Offset(0.0 + value, 0.0);
+              return FractionalTranslation(
+                translation: slideOutOffset,
+                child: widget.children[index],
+              );
+            } else {
+              return const SizedBox.shrink();
+            }
+          }),
+        );
+      },
     );
   }
 }

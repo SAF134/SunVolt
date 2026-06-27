@@ -118,7 +118,7 @@ app.post('/api/midtrans-callback', async (req, res) => {
                         const formattedAmount = amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                         await db.collection('users').doc(userId).collection('activity_history').add({
                             title: 'Top-Up Dompet',
-                            subtitle: 'QRIS',
+                            subtitle: 'Sanbox Midtrans',
                             amount: `+Rp ${formattedAmount}`,
                             isPositive: true,
                             timestamp: admin.firestore.FieldValue.serverTimestamp(),

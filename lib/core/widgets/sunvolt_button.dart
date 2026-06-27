@@ -21,17 +21,34 @@ class SunVoltPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       width: double.infinity,
       height: height,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFFFF59D),
+            Color(0xFFEAB308),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFEAB308).withValues(alpha: 0.25),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(1.5),
       child: Material(
         color: AppColors.primaryContainer,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14.5),
         child: InkWell(
           onTap: onPressed,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14.5),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 30.5),
             child: Row(
               mainAxisAlignment:
                   trailing != null
@@ -79,17 +96,34 @@ class SunVoltSecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       width: double.infinity,
       height: height,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.secondary.withValues(alpha: 0.3),
+            AppColors.secondary,
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.secondary.withValues(alpha: 0.25),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(1.5),
       child: Material(
         color: AppColors.secondary,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14.5),
         child: InkWell(
           onTap: onPressed,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14.5),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 30.5),
             child: Row(
               mainAxisAlignment:
                   trailing != null

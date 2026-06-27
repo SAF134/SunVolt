@@ -93,219 +93,229 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
         ModalRoute.of(context)?.settings.arguments as String? ?? 'Rp 10.000';
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.surfaceContainerLowest,
       body: Stack(
         children: [
-          // Yellow gradient top
+          // Background Glow Blurs
           Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
+            top: -100,
+            right: -100,
             child: Container(
-              height: 120,
+              width: 300,
+              height: 300,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.primaryContainer.withValues(alpha: 0.08),
-                    Colors.transparent,
-                  ],
-                ),
+                color: const Color(0xFFFFD700).withValues(alpha: 0.08),
+                shape: BoxShape.circle,
               ),
             ),
           ),
+          Positioned(
+            bottom: 100,
+            left: -120,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withValues(alpha: 0.06),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+
           SafeArea(
             child: Column(
               children: [
                 // App bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 24, 12),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Image.asset(
-                            'assets/images/Logo_SunVolt.png',
-                            width: 32,
-                            height: 32,
-                            fit: BoxFit.contain,
-                          ),
-                          const SizedBox(width: 4),
-                          RichText(
-                            text: TextSpan(
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -1,
-                              ),
-                              children: const [
-                                TextSpan(
-                                  text: 'Sun',
-                                  style: TextStyle(color: AppColors.yellowAccent400),
-                                ),
-                                TextSpan(
-                                  text: 'Volt',
-                                  style: TextStyle(color: AppColors.voltGreen),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                        color: AppColors.onSurface,
+                        iconSize: 20,
+                        onPressed: () {
+                          SunVoltConfirmationDialog.show(
+                            context,
+                            title: 'Konfirmasi Pembatalan',
+                            message: 'Apakah Anda yakin ingin membatalkan transaksi ini?',
+                            isDestructive: true,
+                            onConfirm: () => Navigator.pop(context),
+                          );
+                        },
                       ),
-
+                      const SizedBox(width: 8),
+                      Image.asset(
+                        'assets/images/Logo_SunVolt.png',
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(width: 6),
+                      RichText(
+                        text: TextSpan(
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1,
+                          ),
+                          children: const [
+                            TextSpan(
+                              text: 'Sun',
+                              style: TextStyle(color: AppColors.yellowAccent400),
+                            ),
+                            TextSpan(
+                              text: 'Volt',
+                              style: TextStyle(color: AppColors.voltGreen),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
+                
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         Text(
-                          'Pembayaran QRIS',
+                          'Pembayaran Sanbox Midtrans',
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 28, fontWeight: FontWeight.w800,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.onSurface,
+                            letterSpacing: -0.5,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         Text(
-                          'Klik tombol di bawah untuk mendapatkan QRIS',
+                          'Klik tombol di bawah untuk mendapatkan Sanbox Midtrans',
                           style: GoogleFonts.manrope(
-                            fontSize: 14, color: AppColors.onSurfaceVariant,
+                            fontSize: 14,
+                            color: AppColors.onSurfaceVariant.withValues(alpha: 0.8),
                           ),
                         ),
                         const SizedBox(height: 24),
-                        // Total Bill Card
+                        
+                        // Total Bill Card - Dark Slate Premium design
                         Container(
-                          padding: const EdgeInsets.all(24),
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: AppColors.primaryContainer,
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(28),
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                const Color(0xFFFFD700).withValues(alpha: 0.3),
+                                Colors.transparent,
+                              ],
+                            ),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primaryContainer.withValues(alpha: 0.2),
-                                blurRadius: 20,
+                                color: Colors.black.withValues(alpha: 0.12),
+                                blurRadius: 24,
                                 offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(1.5),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 26.5, horizontal: 22.5),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Color(0xFF1E293B),
+                                  Color(0xFF0F172A),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(26.5),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'TOTAL TAGIHAN',
+                                  style: GoogleFonts.spaceGrotesk(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 2.0,
+                                    color: Colors.white.withValues(alpha: 0.6),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  amount,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 38,
+                                    fontWeight: FontWeight.w900,
+                                    color: const Color(0xFFFFD700),
+                                    letterSpacing: -1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+                        
+                        // QR Code Container (Mock Sanbox Midtrans scanner mockup)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(28),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceContainerLowest,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: AppColors.outlineVariant.withValues(alpha: 0.15),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.02),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
                           child: Column(
                             children: [
+                              // Mock QR scanner box
+                              Container(
+                                width: 130,
+                                height: 130,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: AppColors.outlineVariant.withValues(alpha: 0.3),
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.03),
+                                      blurRadius: 8,
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.qr_code_2_rounded,
+                                  size: 106,
+                                  color: Color(0xFF0F172A),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
                               Text(
-                                'Total Tagihan',
+                                'Sistem siap melakukan pembayaran secara aman melalui Sandbox Midtrans',
+                                textAlign: TextAlign.center,
                                 style: GoogleFonts.manrope(
                                   fontSize: 14,
-                                  color: AppColors.onPrimaryContainer.withValues(alpha: 0.7),
+                                  height: 1.5,
                                   fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                amount,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.w900,
-                                  color: AppColors.onPrimaryContainer,
-                                  letterSpacing: -1,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        
-                        // Action Section
-                        Center(
-                          child: _isLoading 
-                            ? const CircularProgressIndicator(color: AppColors.primary)
-                            : Column(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(32),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.surfaceContainerLow,
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        const Icon(Icons.qr_code_2_rounded, size: 100, color: AppColors.onSurface),
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          'Sistem siap membuat QRIS\nmelalui Midtrans Sandbox',
-                                          textAlign: TextAlign.center,
-                                          style: GoogleFonts.manrope(
-                                            fontSize: 14, color: AppColors.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 32),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    height: 56,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        SunVoltConfirmationDialog.show(
-                                          context,
-                                          title: 'Konfirmasi Pembayaran',
-                                          message: 'Anda akan dialihkan ke halaman pembayaran Midtrans untuk nominal $amount.',
-                                          confirmLabel: 'Ya',
-                                          cancelLabel: 'Tidak',
-                                          onConfirm: () => _createTransaction(amount),
-                                        );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.primary,
-                                        foregroundColor: AppColors.onSurface,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(16),
-                                        ),
-                                        elevation: 0,
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          const Icon(Icons.payment_rounded, size: 20),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            'Bayar Sekarang',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 16, fontWeight: FontWeight.bold
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                        ),
-                        
-                        const SizedBox(height: 48),
-                        // Info note
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceContainerLow,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(Icons.info_outline, color: AppColors.tertiary, size: 20),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  'Tombol di atas akan membuka halaman pembayaran Midtrans. Silakan pilih metode QRIS dan simpan/scan kodenya.',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 13, color: AppColors.onSurfaceVariant, height: 1.5,
-                                  ),
+                                  color: AppColors.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -313,11 +323,77 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
                         ),
                         
                         const SizedBox(height: 24),
-                        // Cancel
-                        SizedBox(
-                          width: double.infinity,
-                          height: 56,
-                          child: OutlinedButton(
+                        // Info Note
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryContainer.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: AppColors.primaryContainer.withValues(alpha: 0.15),
+                            ),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(
+                                Icons.info_outline_rounded,
+                                color: AppColors.primaryContainer,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Tombol bayar di bawah ini akan membuka halaman pembayaran Sandbox Midtrans resmi.',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 13,
+                                    color: AppColors.onSurfaceVariant,
+                                    height: 1.5,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 120),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      bottomSheet: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceContainerLowest.withValues(alpha: 0.96),
+          border: Border(
+            top: BorderSide(
+              color: AppColors.outlineVariant.withValues(alpha: 0.15),
+              width: 1,
+            ),
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+            child: _isLoading
+                ? const SizedBox(
+                    height: 58,
+                    child: Center(
+                      child: CircularProgressIndicator(color: AppColors.primary),
+                    ),
+                  )
+                : Row(
+                    children: [
+                      // Cancel Button
+                      Expanded(
+                        child: SizedBox(
+                          height: 58,
+                          child: OutlinedButton.icon(
                             onPressed: () {
                               SunVoltConfirmationDialog.show(
                                 context,
@@ -328,36 +404,100 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
                               );
                             },
                             style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: AppColors.error),
+                              side: BorderSide(
+                                color: AppColors.error.withValues(alpha: 0.4),
+                                width: 1.5,
+                              ),
                               foregroundColor: AppColors.error,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(18),
                               ),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.close_rounded, size: 20),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Batalkan Transaksi',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 16, fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
+                            icon: const Icon(Icons.close_rounded, size: 20),
+                            label: Text(
+                              'Batalkan',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 32),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Pay Button
+                      Expanded(
+                        child: Container(
+                          height: 58,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFFFFF176),
+                                Color(0xFFF5C400),
+                              ],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(1.5),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16.5),
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color(0xFFFFD700),
+                                  Color(0xFFE5B200),
+                                ],
+                              ),
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  SunVoltConfirmationDialog.show(
+                                    context,
+                                    title: 'Konfirmasi Pembayaran',
+                                    message: 'Anda akan dialihkan ke halaman pembayaran Midtrans untuk nominal $amount.',
+                                    confirmLabel: 'Ya',
+                                    cancelLabel: 'Tidak',
+                                    onConfirm: () => _createTransaction(amount),
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(16.5),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.payment_rounded,
+                                      color: Color(0xFF221B00),
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Bayar',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        color: const Color(0xFF221B00),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
           ),
-        ],
+        ),
       ),
     );
   }

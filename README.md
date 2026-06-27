@@ -16,7 +16,7 @@ SunVolt adalah aplikasi mobile berbasis Flutter yang terintegrasi dengan perangk
   - Pemantauan daya pengisian, waktu berjalan, dan biaya secara *real-time* yang disinkronisasi lewat Firebase Cloud Firestore.
   - Fitur *Auto-Stop* ketika baterai penuh atau biaya berjalan telah mencapai batas saldo.
 - **💳 Integrated Digital Wallet**:
-  - Top-up saldo instan melalui simulasi QRIS.
+  - Top-up saldo instan melalui simulasi Sanbox Midtrans.
   - Manajemen riwayat aktivitas pengisian daya dan top-up (termasuk fitur hapus riwayat secara permanen).
 - **🛡️ Keamanan & Konfirmasi**: Alur kerja yang ketat untuk memulai dan menghentikan pengisian daya guna mencegah kesalahan penggunaan.
 - **💎 Desain "Solar Kinetic"**: Antarmuka modern dengan konsep *tonal layering*, *glassmorphism*, dan desain minim garis (*no-line aesthetic*).

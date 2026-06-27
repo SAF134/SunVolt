@@ -5,7 +5,6 @@ import '../theme/app_colors.dart';
 class SunVoltStationCard extends StatelessWidget {
   final String name;
   final String address;
-  final int slots;
   final List<String> tags;
   final String? distanceString;
   final VoidCallback onSelect;
@@ -15,7 +14,6 @@ class SunVoltStationCard extends StatelessWidget {
     super.key,
     required this.name,
     required this.address,
-    required this.slots,
     required this.tags,
     this.distanceString,
     required this.onSelect,
@@ -24,144 +22,215 @@ class SunVoltStationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMain = tags.contains('Utama');
     return Stack(
       clipBehavior: Clip.none,
       children: [
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.95),
-            borderRadius: BorderRadius.circular(16),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: Colors.black.withValues(alpha: 0.04),
+              width: 1.0,
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 24,
-                offset: const Offset(0, -4),
+                blurRadius: 32,
+                offset: const Offset(0, 12),
+                spreadRadius: -4,
               ),
             ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Tags
-              if (tags.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(right: 24), // Space for close button
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: tags.map((tag) {
-                      final isFirst = tag == tags.first;
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
+              // Header Row: Badge
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Premium Pill Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isMain 
+                          ? const Color(0xFFFFD700).withValues(alpha: 0.12)
+                          : AppColors.secondary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: isMain 
+                            ? const Color(0xFFFFD700).withValues(alpha: 0.3)
+                            : AppColors.secondary.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isMain ? Icons.star_rounded : Icons.flash_on_rounded,
+                          color: isMain ? const Color(0xFFD4AF37) : AppColors.secondary,
+                          size: 14,
                         ),
-                        decoration: BoxDecoration(
-                          color: isFirst
-                              ? AppColors.primaryContainer
-                              : AppColors.secondaryContainer,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          tag,
-                          style: GoogleFonts.manrope(
+                        const SizedBox(width: 4),
+                        Text(
+                          isMain ? 'Stasiun Utama' : (tags.isNotEmpty ? tags.first : 'Stasiun'),
+                          style: GoogleFonts.spaceGrotesk(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: isFirst
-                                ? AppColors.onPrimaryContainer
-                                : AppColors.onSecondaryContainer,
-                            letterSpacing: -0.5,
+                            letterSpacing: 0.5,
+                            color: isMain ? const Color(0xFF8A6D00) : AppColors.secondary,
                           ),
                         ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              const SizedBox(height: 10),
-              Text(
-                name,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.onSurface,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                address,
-                style: GoogleFonts.manrope(
-                  fontSize: 12,
-                  color: AppColors.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(
-                    Icons.ev_station,
-                    size: 14,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '$slots Slot Tersedia',
-                    style: GoogleFonts.manrope(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.onSurfaceVariant,
+                      ],
                     ),
                   ),
-                  if (distanceString != null) ...[
-                    const SizedBox(width: 12),
-                    Container(
-                      width: 4,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[400],
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Icon(
-                      Icons.route_rounded, // Route icon
-                      size: 14,
-                      color: AppColors.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      distanceString!,
-                      style: GoogleFonts.manrope(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+                  const SizedBox(width: 40), // space for close button
                 ],
               ),
               const SizedBox(height: 16),
-              // Navigate button
-              SizedBox(
+              
+              // Station Info Row (Icon + Name/Address)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColors.secondary.withValues(alpha: 0.1),
+                        width: 1,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.ev_station_rounded,
+                      color: AppColors.secondary,
+                      size: 26,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                            color: AppColors.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.location_on_outlined,
+                              color: AppColors.outline,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                address,
+                                style: GoogleFonts.manrope(
+                                  fontSize: 12,
+                                  height: 1.4,
+                                  color: AppColors.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              
+              // Distance Badge / Area (if available)
+              if (distanceString != null) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.outlineVariant.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.route_rounded,
+                        size: 18,
+                        color: AppColors.secondary,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Jarak Anda ke Stasiun: $distanceString',
+                          style: GoogleFonts.manrope(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.secondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+              
+              // Select Button
+              Container(
                 width: double.infinity,
-                height: 48,
-                child: ElevatedButton.icon(
+                height: 52,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFFD700).withValues(alpha: 0.15),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
                   onPressed: onSelect,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryContainer,
-                    foregroundColor: AppColors.onPrimaryContainer,
+                    backgroundColor: const Color(0xFFFFD700), // brand yellow
+                    foregroundColor: const Color(0xFF221B00), // Dark text for contrast
                     elevation: 0,
+                    shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  icon: const Icon(Icons.directions, size: 20),
-                  label: Text(
-                    'Pilih Stasiun Ini',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.near_me_rounded, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Pilih Stasiun Ini',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -170,8 +239,8 @@ class SunVoltStationCard extends StatelessWidget {
         ),
         if (onClose != null)
           Positioned(
-            top: 4,
-            right: 4,
+            top: 20,
+            right: 20,
             child: Material(
               color: Colors.transparent,
               child: IconButton(

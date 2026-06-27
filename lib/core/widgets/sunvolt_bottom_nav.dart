@@ -60,7 +60,7 @@ class SunVoltBottomNav extends StatelessWidget {
                   onTap: () => onTap(index),
                   behavior: HitTestBehavior.opaque,
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 250),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 8,
@@ -68,34 +68,51 @@ class SunVoltBottomNav extends StatelessWidget {
                     decoration: BoxDecoration(
                       color:
                           isActive
-                              ? const Color(0xFFFACC15)
+                              ? const Color(0xFFFFD700)
                               : Colors.transparent,
                       borderRadius: BorderRadius.circular(999),
+                      boxShadow: isActive ? [
+                        BoxShadow(
+                          color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        )
+                      ] : null,
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          item.icon,
-                          size: 24,
-                          color:
-                              isActive
-                                  ? const Color(0xFF18181B)
-                                  : const Color(0xFF71717A),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          item.label,
-                          style: GoogleFonts.manrope(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color:
-                                isActive
-                                    ? const Color(0xFF18181B)
-                                    : const Color(0xFF71717A),
+                    child: AnimatedScale(
+                      scale: isActive ? 1.05 : 1.0,
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOutBack,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AnimatedScale(
+                            scale: isActive ? 1.15 : 1.0,
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOutBack,
+                            child: Icon(
+                              item.icon,
+                              size: 24,
+                              color:
+                                  isActive
+                                      ? const Color(0xFF18181B)
+                                      : const Color(0xFF71717A),
+                            ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 2),
+                          Text(
+                            item.label,
+                            style: GoogleFonts.manrope(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color:
+                                  isActive
+                                      ? const Color(0xFF18181B)
+                                      : const Color(0xFF71717A),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );

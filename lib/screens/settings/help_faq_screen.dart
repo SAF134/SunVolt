@@ -63,8 +63,8 @@ class HelpFaqScreen extends StatelessWidget {
                   ),
                   _buildStepCard(
                     '3',
-                    'Scan & Bayar QRIS',
-                    'Gunakan aplikasi e-wallet (GoPay, OVO, Dana) atau Mobile Banking Anda untuk memindai kode QRIS yang tampil.',
+                    'Scan & Bayar Sanbox Midtrans',
+                    'Gunakan aplikasi e-wallet (GoPay, OVO, Dana) atau Mobile Banking Anda untuk memindai kode Sanbox Midtrans yang tampil.',
                   ),
                   _buildStepCard(
                     '4',
@@ -79,16 +79,20 @@ class HelpFaqScreen extends StatelessWidget {
                     'Tarif listrik di seluruh stasiun SunVolt adalah Rp 2.500 per kWh. Biaya dihitung secara presisi hanya berdasarkan energi yang benar-benar masuk ke baterai kendaraan Anda, bukan berdasarkan durasi atau waktu colok.',
                   ),
                   _buildFaqItem(
+                    'Bagaimana aturan ketersediaan slot pengisian daya?',
+                    'Pengguna dapat mengisi daya sepeda listrik ketika Relay DC aktif dan slot Sepeda berstatus "Tersedia". Begitu pula untuk motor listrik, pengisian dapat dilakukan ketika Relay AC aktif dan slot Motor berstatus "Tersedia". Jika salah satu slot sedang digunakan oleh orang lain ("Sedang Dipakai"), Anda harus menunggu hingga pengguna tersebut selesai.',
+                  ),
+                  _buildFaqItem(
                     'Berapa minimum saldo untuk mulai mengisi?',
-                    'Demi kelancaran dan mencegah pengisian terputus di tengah jalan, saldo dompet minimum adalah:\n• Sepeda Listrik (48V): Rp 2.400\n• Motor Listrik (72V): Rp 5.400',
+                    'Demi kelancaran dan keamanan pengisian daya, batas saldo minimum adalah:\n• Sepeda Listrik (Relay DC): Rp 2.400\n• Motor Listrik (Relay AC): Rp 5.400',
                   ),
                   _buildFaqItem(
                     'Bagaimana jika saldo habis di tengah jalan?',
-                    'Tidak perlu khawatir. SunVolt Smart System akan menghentikan aliran listrik secara otomatis saat biaya berjalan telah mencapai batas saldo Anda. Anda tidak akan pernah dicharge melebihi saldo yang dimiliki.',
+                    'Tidak perlu khawatir. SunVolt Smart System akan menghentikan aliran listrik secara otomatis saat biaya berjalan telah mencapai batas saldo Anda. Aliran daya (Relay AC/DC) akan otomatis dimatikan.',
                   ),
                   _buildFaqItem(
                     'Bagaimana sistem memonitor daya secara akurat?',
-                    'Stasiun SunVolt terintegrasi dengan perangkat IoT (Internet of Things) menggunakan Mikrokontroler ESP32 dan Sensor Arus ACS712. Pemakaian arus dibaca secara presisi setiap detiknya dan dikirim ke aplikasi Anda secara real-time melalui server Firebase.',
+                    'Stasiun SunVolt terintegrasi dengan perangkat IoT (Internet of Things) menggunakan Mikrokontroler ESP32, Relay AC/DC, dan Sensor Arus ACS712. Pemakaian arus dibaca secara presisi setiap detiknya dan dikirim ke aplikasi secara real-time.',
                   ),
                   _buildFaqItem(
                     'Profil pengisian CC-CV itu apa?',
@@ -100,7 +104,7 @@ class HelpFaqScreen extends StatelessWidget {
                   _buildSectionTitle('FAQ: Dompet & Pembayaran'),
                   _buildFaqItem(
                     'Metode Top-Up apa saja yang didukung?',
-                    'Saat ini kami mendukung metode QRIS. Anda bisa menggunakan berbagai e-wallet (GoPay, OVO, Dana) dan Mobile Banking yang mendukung pembayaran QRIS. Saldo akan otomatis bertambah secara real-time.',
+                    'Saat ini kami mendukung metode Sanbox Midtrans. Anda bisa menggunakan berbagai e-wallet (GoPay, OVO, Dana) dan Mobile Banking yang mendukung pembayaran Sanbox Midtrans. Saldo akan otomatis bertambah secara real-time.',
                   ),
                   _buildFaqItem(
                     'Apakah ada biaya admin untuk Top-Up?',
@@ -115,12 +119,16 @@ class HelpFaqScreen extends StatelessWidget {
 
                   _buildSectionTitle('FAQ: Keamanan & Akun'),
                   _buildFaqItem(
+                    'Perangkat apa saja yang didukung oleh SunVolt?',
+                    'Aplikasi SunVolt saat ini dirancang eksklusif dan hanya dapat diakses melalui perangkat mobile Android demi kinerja dan kecocokan integrasi hardware yang optimal. Tidak mendukung iOS, macOS, Windows, Linux, maupun Web.',
+                  ),
+                  _buildFaqItem(
                     'Aman tidak mengisi daya saat hujan?',
                     'Stasiun SunVolt dilengkapi desain pelindung sasis IP65 (Tahan Air dan Debu). Namun kami sangat menghimbau untuk memastikan ujung kabel dan port di kendaraan Anda dalam keadaan kering sebelum mencolok.',
                   ),
                   _buildFaqItem(
                     'Bagaimana jika koneksi internet terputus?',
-                    'Untuk saat ini, stasiun SunVolt memerlukan koneksi internet yang stabil agar data pengisian dapat disinkronisasi ke server secara real-time. Jika koneksi terputus, proses mungkin akan terhenti demi keamanan saldo dan transaksi Anda.',
+                    'Aplikasi pada perangkat Android Anda memerlukan koneksi internet yang aktif untuk mengirimkan instruksi mulai/berhenti serta menyelaraskan status relay secara real-time ke database cloud.',
                   ),
 
                   const SizedBox(height: 40),
@@ -291,6 +299,13 @@ class HelpFaqScreen extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Theme(
         data: ThemeData().copyWith(dividerColor: Colors.transparent),
@@ -384,6 +399,13 @@ class HelpFaqScreen extends StatelessWidget {
         border: Border.all(
           color: color.withValues(alpha: 0.1),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Row(
         children: [

@@ -106,26 +106,24 @@ class AboutScreen extends StatelessWidget {
                   _buildFeatureCard(
                     icon: Icons.qr_code_scanner_rounded,
                     color: AppColors.primaryContainer,
-                    title: 'Seamless QRIS Payment',
+                    title: 'Seamless Sanbox Midtrans Payment',
                     desc: 'Integrasi e-wallet otomatis dan pemotongan saldo berjalan (Auto-Stop) sehingga Anda hanya membayar daya yang benar-benar terserap.',
                   ),
                   _buildFeatureCard(
-                    icon: Icons.signal_wifi_4_bar_rounded,
+                    icon: Icons.android_rounded,
                     color: const Color(0xFFEAB308),
-                    title: 'Stable Connectivity',
-                    desc: 'Sistem memerlukan koneksi internet yang stabil untuk sinkronisasi data real-time antara mesin pengisian dan server pusat demi keamanan transaksi.',
+                    title: 'Eksklusif Mobile Android',
+                    desc: 'Aplikasi SunVolt dikembangkan dan dioptimalkan secara eksklusif untuk platform mobile Android guna sinkronisasi data relay dan transaksi yang stabil.',
                   ),
 
                   const SizedBox(height: 40),
-
-
 
                   // Tech Stack & Info
                   _buildSectionTitle('Sistem & Hardware'),
                   const SizedBox(height: 16),
                   _buildInfoCard([
-                    _infoEntry('Software', 'Flutter & Firebase Ecosystem'),
-                    _infoEntry('Microcontroller', 'ESP32 Dev Module (IoT)'),
+                    _infoEntry('Software', 'Flutter (Android SDK) & Firebase'),
+                    _infoEntry('Microcontroller', 'ESP32 Dev Module (IoT Relay)'),
                     _infoEntry('Sensor Kelistrikan', 'ACS712 (Real-time Current)'),
                     _infoEntry('Protokol', 'Wi-Fi ke Cloud Firestore'),
                   ]),
@@ -236,8 +234,8 @@ class AboutScreen extends StatelessWidget {
         border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: 0.03),
-            blurRadius: 15,
+            color: color.withValues(alpha: 0.06),
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -291,6 +289,13 @@ class AboutScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         children: entries,

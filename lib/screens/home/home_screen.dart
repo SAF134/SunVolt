@@ -29,7 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
       name: 'Stasiun SunVolt',
       position: LatLng(-6.969190449877452, 107.62849044096225),
       distance: '0m',
-      slots: 2,
       tags: ['Utama'],
     ),
   ];
@@ -151,6 +150,17 @@ class _HomeScreenState extends State<HomeScreen> {
         _calculatedDistance = '${(estimatedRoadDistance / 1000).toStringAsFixed(1)} km';
       }
     });
+  }
+
+  void _centerMapOnStation() {
+    setState(() {
+      _selectedStationIndex = 0;
+      _showCard = true;
+    });
+    _mapController.move(_stations[0].position, 15);
+    if (_userLocation != null) {
+      _calculateDistance(_userLocation!, _stations[0].position);
+    }
   }
 
   @override
@@ -289,42 +299,74 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
 
-          // My Location button
+          // Location buttons overlay (User & Station)
           Positioned(
-            top: 134,
+            top: MediaQuery.paddingOf(context).top + 76,
             right: 24,
-            child: GestureDetector(
-              onTap: _isLoadingLocation ? null : _getUserLocation,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(999),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 12,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // My Location button
+                GestureDetector(
+                  onTap: _isLoadingLocation ? null : _getUserLocation,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
                     ),
-                  ],
-                ),
-                child: _isLoadingLocation 
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 12,
                         ),
-                      )
-                    : const Icon(
-                        Icons.my_location,
-                        color: Color(0xFFEAB308),
-                        size: 20,
-                      ),
-              ),
+                      ],
+                    ),
+                    child: _isLoadingLocation 
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                            ),
+                          )
+                        : const Icon(
+                            Icons.my_location,
+                            color: Color(0xFFEAB308),
+                            size: 20,
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // SunVolt Station Location button
+                GestureDetector(
+                  onTap: _centerMapOnStation,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 12,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.ev_station,
+                      color: AppColors.secondary,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -332,14 +374,13 @@ class _HomeScreenState extends State<HomeScreen> {
           // Bottom station info card
           if (selectedStation != null)
             Positioned(
-              bottom: 135,
+              bottom: 100 + MediaQuery.paddingOf(context).bottom,
               left: 24,
               right: 24,
               child: SunVoltStationCard(
                 name: selectedStation.name,
                 address:
                     'Jl. Telekomunikasi No.1, Sukapura, Kec. Dayeuhkolot, Kabupaten Bandung, Jawa Barat',
-                slots: selectedStation.slots,
                 tags: selectedStation.tags,
                 distanceString: _calculatedDistance,
                 onSelect: () => Navigator.pushNamed(context, '/station-detail'),
@@ -359,7 +400,6 @@ class _StationData {
   final String name;
   final LatLng position;
   final String distance;
-  final int slots;
   final List<String> tags;
 
   _StationData({
@@ -367,7 +407,6 @@ class _StationData {
     required this.name,
     required this.position,
     required this.distance,
-    required this.slots,
     required this.tags,
   });
 }

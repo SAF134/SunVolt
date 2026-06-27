@@ -50,3 +50,17 @@ backend/.env
 backend/serviceAccountKey.json
 backend/*.log
 
+# Security & Credentials
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+*.jks
+*.keystore
+*.env
+.env
+android/local.properties
+android/key.properties
+/android/key.properties
+/android/local.properties
+
+

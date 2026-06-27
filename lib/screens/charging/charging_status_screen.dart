@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_app_bar.dart';
-import '../../core/widgets/sunvolt_confirmation_dialog.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
@@ -20,7 +20,9 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
+  final _firestore = FirebaseFirestore.instance; // Utama (Milik Anda)
+  late final FirebaseFirestore _secondaryFirestore; // Kedua (Milik Teman)
+  
   final _currencyFormat = NumberFormat.currency(
     locale: 'id', symbol: '', decimalDigits: 0,
   );
@@ -37,11 +39,20 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
   // ─── Spesifikasi Kendaraan ───
   late String _vehicleType;
   late double _fixedVoltage; // 54.6V untuk sepeda (DC), 220V untuk motor (AC)
+  DateTime? _sessionStartTime;
 
   // ─── Status Pengisian ───
   bool _isCharging = true;
   bool _isComplete = false;
   int _elapsedSeconds = 0;
+  
+  // ─── Manajemen Interupsi Relay ───
+  bool _isInterrupted = false;
+  int _interruptionSecondsLeft = 15;
+  Timer? _interruptionTimer;
+  bool _dialogShowing = false;
+  StateSetter? _dialogSetState;
+  bool _hasPressedWait = false;
 
   // ─── Nilai Elektrik Real-time (dari ESP32 via Firebase) ───
   double _currentAmps = 0.0;   // Arus dari ESP32
@@ -55,6 +66,9 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
   @override
   void initState() {
     super.initState();
+    // Menghubungkan ke database Firebase proyek sekunder teman Anda
+    _secondaryFirestore = FirebaseFirestore.instanceFor(app: Firebase.app('secondary'));
+    
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -89,7 +103,50 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
       _fixedVoltage = 54.6;   // Sepeda listrik: Output DC 54.6V
     }
 
-    // Mulai mendengarkan data arus dari ESP32 melalui Firebase
+    // Cek apakah ada sesi aktif untuk user ini di stasiun sekunder untuk resume
+    DateTime startTime = DateTime.now();
+    if (user != null) {
+      try {
+        final stationDoc = await _secondaryFirestore.collection('stations').doc('station_01').get();
+        final stationData = stationDoc.data();
+        
+        if (stationData != null && 
+            stationData['charging_user_uid'] == user.uid && 
+            stationData['vehicle_type'] == _vehicleType &&
+            stationData['session_start_time'] != null) {
+          
+          // Sesi pemulihan
+          final Timestamp ts = stationData['session_start_time'] as Timestamp;
+          startTime = ts.toDate();
+          _energyConsumedWh = (stationData['energy_consumed_wh'] as num?)?.toDouble() ?? 0.0;
+          _elapsedSeconds = DateTime.now().difference(startTime).inSeconds;
+        } else {
+          // Buat sesi baru
+          final Map<String, dynamic> startCommand = {
+            'vehicle_type': _vehicleType,
+            'charging_user_uid': user.uid,
+            'session_start_time': Timestamp.fromDate(startTime),
+            'energy_consumed_wh': 0.0,
+            'last_updated': FieldValue.serverTimestamp(),
+          };
+          if (_vehicleType == 'motor') {
+            startCommand['relayACState'] = 'ON';
+          } else {
+            startCommand['relayDCState'] = 'ON';
+          }
+          await _secondaryFirestore.collection('stations').doc('station_01').set(
+            startCommand,
+            SetOptions(merge: true),
+          );
+        }
+      } catch (e) {
+        debugPrint('Gagal inisialisasi / resume perintah START: $e');
+      }
+    }
+    
+    _sessionStartTime = startTime;
+
+    // Mulai mendengarkan data arus dari ESP32 melalui Firebase Kedua
     _startListeningToSensor();
 
     // Mulai timer waktu (setiap detik)
@@ -101,22 +158,231 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
 
   /// Mendengarkan data arus dari ESP32 secara real-time melalui Firebase
   void _startListeningToSensor() {
-    _sensorSubscription = _firestore
+    _sensorSubscription = _secondaryFirestore
         .collection('stations')
-        .doc('station_1')
+        .doc('station_01')
         .snapshots()
         .listen((snapshot) {
       if (!mounted || _isComplete) return;
 
       final data = snapshot.data();
-      if (data != null && data.containsKey('current_amps')) {
+      if (data != null) {
+        // Cek apakah relay dimatikan dari luar (hardware / web admin) setelah sesi berjalan
+        final String? relayState = _vehicleType == 'motor'
+            ? data['relayACState'] as String?
+            : data['relayDCState'] as String?;
+
+        if (relayState == 'OFF' && _isCharging && !_isComplete && _elapsedSeconds >= 2) {
+          if (!_isInterrupted) {
+            setState(() {
+              _isInterrupted = true;
+              _currentAmps = 0.0;
+              _currentPower = 0.0;
+              _interruptionSecondsLeft = 15;
+              _hasPressedWait = false;
+            });
+
+            // Jalankan hitung mundur interupsi (15 detik)
+            _interruptionTimer?.cancel();
+            _interruptionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+              if (!mounted) {
+                timer.cancel();
+                return;
+              }
+              if (_interruptionSecondsLeft > 0) {
+                setState(() {
+                  _interruptionSecondsLeft--;
+                });
+                _dialogSetState?.call(() {}); // Update teks countdown di dialog
+              } else {
+                timer.cancel();
+                _handleInterruptionTimeout();
+              }
+            });
+
+            _showInterruptionDialog();
+          }
+          return;
+        }
+
+        // Jika relay aktif kembali sebelum batas waktu, batalkan interupsi
+        if (relayState == 'ON' && _isInterrupted) {
+          setState(() {
+            _isInterrupted = false;
+          });
+          _interruptionTimer?.cancel();
+          if (_dialogShowing) {
+            Navigator.of(context).pop();
+            _dialogShowing = false;
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Koneksi terhubung kembali. Pengisian daya dilanjutkan.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+
         setState(() {
-          _currentAmps = (data['current_amps'] as num).toDouble();
+          // Membaca acCurrent untuk motor, dcCurrent untuk sepeda dari Firebase Kedua
+          if (_vehicleType == 'motor') {
+            _currentAmps = (data['acCurrent'] as num?)?.toDouble() ?? 0.0;
+          } else {
+            _currentAmps = (data['dcCurrent'] as num?)?.toDouble() ?? 0.0;
+          }
           // Daya (Watt) = Arus (A) × Tegangan (V)
           _currentPower = _currentAmps * _fixedVoltage;
         });
       }
     });
+  }
+
+  /// Menampilkan dialog interupsi / koneksi terputus dengan pilihan Tunggu atau Berhenti
+  void _showInterruptionDialog() {
+    if (_dialogShowing) return;
+    _dialogShowing = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (dialogCtx, setDialogState) {
+            _dialogSetState = setDialogState;
+
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: AppColors.error),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Interupsi Pengisian',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Aliran listrik dari stasiun terputus. Silakan pilih untuk menunggu koneksi kembali atau berhenti sekarang.',
+                    style: GoogleFonts.manrope(
+                      fontSize: 14,
+                      color: AppColors.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Sisa waktu tunggu: $_interruptionSecondsLeft detik...',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.error,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    // Tutup pop-up dan ubah sisa waktu menjadi 60 detik (1 menit)
+                    Navigator.of(dialogCtx).pop();
+                    _dialogShowing = false;
+                    setState(() {
+                      _hasPressedWait = true;
+                      _interruptionSecondsLeft = 60;
+                    });
+                  },
+                  child: Text(
+                    'Tunggu',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    // Tutup dialog dan hentikan pengisian daya secara manual
+                    Navigator.of(dialogCtx).pop();
+                    _dialogShowing = false;
+
+                    setState(() {
+                      _isCharging = false;
+                      _isComplete = true;
+                      _currentPower = 0.0;
+                      _currentAmps = 0.0;
+                    });
+                    _interruptionTimer?.cancel();
+                    _chargingTimer?.cancel();
+                    _sensorSubscription?.cancel();
+                    _pulseController.stop();
+
+                    await _recordAndFinalize();
+
+                    if (mounted) {
+                      Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.error,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: Text(
+                    'Berhenti',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    ).then((_) {
+      _dialogShowing = false;
+      _dialogSetState = null;
+    });
+  }
+
+  /// Dipanggil ketika batas waktu tunggu interupsi (60 detik) habis
+  void _handleInterruptionTimeout() async {
+    setState(() {
+      _isCharging = false;
+      _isComplete = true;
+      _currentPower = 0.0;
+      _currentAmps = 0.0;
+    });
+    _interruptionTimer?.cancel();
+    _chargingTimer?.cancel();
+    _sensorSubscription?.cancel();
+    _pulseController.stop();
+
+    if (_dialogShowing) {
+      Navigator.of(context).pop();
+      _dialogShowing = false;
+    }
+
+    await _recordAndFinalize();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Batas waktu tunggu habis. Pengisian dihentikan secara otomatis.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
+    }
   }
 
   /// Dipanggil setiap detik selama pengisian berlangsung
@@ -125,9 +391,16 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
       timer.cancel();
       return;
     }
+    if (_isInterrupted) {
+      return;
+    }
 
     setState(() {
-      _elapsedSeconds++;
+      if (_sessionStartTime != null) {
+        _elapsedSeconds = DateTime.now().difference(_sessionStartTime!).inSeconds;
+      } else {
+        _elapsedSeconds++;
+      }
 
       // Akumulasi energi: Daya (W) × waktu (1 detik) = Watt-second → konversi ke Wh
       _energyConsumedWh += _currentPower / 3600.0;
@@ -176,18 +449,19 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
     });
   }
 
-  /// Mengirim data monitoring (daya, waktu, tarif) ke Firebase
+  /// Mengirim data monitoring (daya, waktu, tarif) ke Firebase Kedua
   Future<void> _updateRealTimeData() async {
     try {
-      await _firestore.collection('stations').doc('station_1').set({
+      await _secondaryFirestore.collection('stations').doc('station_01').set({
         'power_watts': _currentPower,
         'elapsed_seconds': _elapsedSeconds,
         'current_tariff': _currentTariff.round(),
+        'energy_consumed_wh': _energyConsumedWh,
         'vehicle_type': _vehicleType,
         'last_updated': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     } catch (e) {
-      debugPrint('Gagal mengirim data real-time: $e');
+      debugPrint('Gagal mengirim data real-time ke hardware: $e');
     }
   }
 
@@ -267,12 +541,12 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
         : 'Pengisian Sepeda Listrik';
 
     try {
-      // Potong saldo dompet
+      // Potong saldo dompet di Firebase Utama Anda
       await _firestore.collection('users').doc(user.uid).update({
         'balance': FieldValue.increment(-tariffAmount),
       });
 
-      // Tambah ke riwayat aktivitas
+      // Tambah ke riwayat aktivitas di Firebase Utama Anda
       await _firestore
           .collection('users')
           .doc(user.uid)
@@ -289,12 +563,19 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
         'duration_seconds': _elapsedSeconds,
       });
 
-      // Reset status station di Firebase
-      await _firestore.collection('stations').doc('station_1').set({
+      // Reset status station & matikan relay di Firebase Kedua teman Anda
+      await _secondaryFirestore.collection('stations').doc('station_01').set({
         'power_watts': 0,
         'elapsed_seconds': 0,
         'current_tariff': 0,
         'vehicle_type': '',
+        'charging_user_uid': '',
+        'session_start_time': null,
+        'energy_consumed_wh': 0.0,
+        'relayACState': 'OFF', // Matikan relay AC
+        'relayDCState': 'OFF', // Matikan relay DC
+        'acCurrent': 0,
+        'dcCurrent': 0,
         'last_updated': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     } catch (e) {
@@ -306,6 +587,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
   void dispose() {
     _chargingTimer?.cancel();
     _sensorSubscription?.cancel();
+    _interruptionTimer?.cancel();
     _pulseController.dispose();
     super.dispose();
   }
@@ -339,7 +621,9 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
                           ? (_stoppedByBalance
                               ? AppColors.error.withValues(alpha: 0.12)
                               : AppColors.secondary.withValues(alpha: 0.15))
-                          : AppColors.secondaryContainer,
+                          : (_isInterrupted
+                              ? AppColors.error.withValues(alpha: 0.12)
+                              : AppColors.secondaryContainer),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
@@ -347,7 +631,11 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
                           ? (_stoppedByBalance
                               ? 'PENGISIAN DAYA DIHENTIKAN'
                               : 'PENGISIAN DAYA TELAH SELESAI')
-                          : 'PENGISIAN DAYA SEDANG BERLANGSUNG',
+                          : (_isInterrupted
+                              ? (_hasPressedWait
+                                  ? 'PENGISIAN DIINTERUPSI (TUNGGU ${_interruptionSecondsLeft}S)'
+                                  : 'PENGISIAN DAYA DIINTERUPSI')
+                              : 'PENGISIAN DAYA SEDANG BERLANGSUNG'),
                       style: GoogleFonts.manrope(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -356,7 +644,9 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
                             ? (_stoppedByBalance
                                 ? AppColors.error
                                 : AppColors.secondary)
-                            : AppColors.onSecondaryContainer,
+                            : (_isInterrupted
+                                ? AppColors.error
+                                : AppColors.onSecondaryContainer),
                       ),
                     ),
                   ),
@@ -467,75 +757,90 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
 
                   // ── Kartu Tarif Berjalan ──
                   Container(
-                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceContainerLowest,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: AppColors.primaryContainer
-                            .withValues(alpha: 0.3),
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.primary.withValues(alpha: 0.4),
+                          AppColors.secondary.withValues(alpha: 0.2),
+                        ],
                       ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Tarif Berjalan',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.onSurfaceVariant,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons
-                                        .account_balance_wallet_rounded,
-                                    color: AppColors.primaryContainer,
-                                    size: 24,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Rp ${_currencyFormat.format(_currentTariff.round()).trim()}',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppColors.onSurface,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                              '${(_energyConsumedWh / 1000.0).toStringAsFixed(2)} kWh terpakai • Rp ${_tariffPerKWh.toInt()}/kWh',
-                                style: GoogleFonts.manrope(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryContainer
-                                .withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.receipt_long,
-                            color: AppColors.primaryContainer,
-                          ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
                         ),
                       ],
+                    ),
+                    padding: const EdgeInsets.all(1.5),
+                    child: Container(
+                      padding: const EdgeInsets.all(18.5),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainerLowest,
+                        borderRadius: BorderRadius.circular(14.5),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Tarif Berjalan',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons
+                                          .account_balance_wallet_rounded,
+                                      color: AppColors.primaryContainer,
+                                      size: 24,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Rp ${_currencyFormat.format(_currentTariff.round()).trim()}',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.w800,
+                                        color: AppColors.onSurface,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                '${(_energyConsumedWh / 1000.0).toStringAsFixed(2)} kWh terpakai • Rp ${_tariffPerKWh.toInt()}/kWh',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryContainer
+                                  .withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.receipt_long,
+                              color: AppColors.primaryContainer,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -545,10 +850,14 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
                     animation: _pulseController,
                     builder: (context, child) {
                       return Container(
-                        padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: AppColors.surfaceContainerLowest,
                           borderRadius: BorderRadius.circular(16),
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.secondary.withValues(alpha: (!_isComplete ? 0.4 : 0.1) * _pulseController.value),
+                              AppColors.primary.withValues(alpha: (!_isComplete ? 0.2 : 0.05) * _pulseController.value),
+                            ],
+                          ),
                           boxShadow: [
                             BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.03),
@@ -560,12 +869,16 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
                                 spreadRadius: 2 * _pulseController.value,
                               ),
                           ],
-                          border: !_isComplete ? Border.all(
-                            color: AppColors.secondary.withValues(alpha: 0.3 * _pulseController.value),
-                            width: 1.5,
-                          ) : Border.all(color: Colors.transparent),
                         ),
-                        child: child,
+                        padding: const EdgeInsets.all(1.5),
+                        child: Container(
+                          padding: const EdgeInsets.all(22.5),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceContainerLowest,
+                            borderRadius: BorderRadius.circular(14.5),
+                          ),
+                          child: child,
+                        ),
                       );
                     },
                     child: Row(
@@ -636,53 +949,60 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
                     ),
                   ),
                   const SizedBox(height: 16),
-
-
-
-                  // ── Tombol Aksi ──
-                  SizedBox(
-                    width: double.infinity,
-                    height: 60,
-                    child: ElevatedButton.icon(
-                      onPressed: _isComplete
-                          ? _onCompletePressed
-                          : _onStopPressed,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isComplete
-                            ? AppColors.secondary
-                            : AppColors.error,
-                        foregroundColor: Colors.white,
-                        elevation: 4,
-                        shadowColor: (_isComplete
-                                ? AppColors.secondary
-                                : AppColors.error)
-                            .withValues(alpha: 0.2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      icon: Icon(
-                        _isComplete
-                            ? Icons.home_rounded
-                            : Icons.stop_circle,
-                      ),
-                      label: Text(
-                        _isComplete
-                            ? 'Kembali ke Beranda'
-                            : 'Berhenti Mengisi',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
+                  SizedBox(height: 100 + MediaQuery.paddingOf(context).bottom),
                 ],
               ),
             ),
           ),
         ],
+      ),
+      bottomSheet: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.9),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+            child: SizedBox(
+              width: double.infinity,
+              height: 60,
+              child: ElevatedButton.icon(
+                onPressed: _isComplete
+                    ? _onCompletePressed
+                    : _onStopPressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isComplete
+                      ? AppColors.secondary
+                      : AppColors.error,
+                  foregroundColor: Colors.white,
+                  elevation: 4,
+                  shadowColor: (_isComplete
+                          ? AppColors.secondary
+                          : AppColors.error)
+                      .withValues(alpha: 0.2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                icon: Icon(
+                  _isComplete
+                      ? Icons.home_rounded
+                      : Icons.stop_circle,
+                ),
+                label: Text(
+                  _isComplete
+                      ? 'Kembali ke Beranda'
+                      : 'Berhenti Mengisi',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -697,37 +1017,23 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
   }
 
   /// Saat pengguna ingin berhenti sebelum 100%
-  void _onStopPressed() {
-    SunVoltConfirmationDialog.show(
-      context,
-      title: 'Berhenti Mengisi Daya?',
-      message:
-          'Pengisian daya sudah berjalan ${_elapsedSeconds ~/ 60} menit ${_elapsedSeconds % 60} detik. '
-          'Tarif yang akan dikenakan: Rp ${_currencyFormat.format(_currentTariff.round()).trim()}. '
-          'Apakah Anda yakin ingin berhenti?',
-      isDestructive: true,
-      onConfirm: () {
-        SunVoltConfirmationDialog.show(
-          context,
-          title: 'Konfirmasi Akhir',
-          message:
-              'Saldo Rp ${_currencyFormat.format(_currentTariff.round()).trim()} '
-              'akan dipotong dari dompet Anda. Lanjutkan?',
-          isDestructive: true,
-          onConfirm: () async {
-            setState(() {
-              _isCharging = false;
-            });
-            await _recordAndFinalize();
-            if (mounted) {
-              Navigator.pushNamedAndRemoveUntil(
-                context, '/main', (route) => false,
-              );
-            }
-          },
-        );
-      },
-    );
+  void _onStopPressed() async {
+    setState(() {
+      _isCharging = false;
+      _isComplete = true;
+      _currentPower = 0.0;
+      _currentAmps = 0.0;
+    });
+    _chargingTimer?.cancel();
+    _sensorSubscription?.cancel();
+    _pulseController.stop();
+
+    await _recordAndFinalize();
+    if (mounted) {
+      Navigator.pushNamedAndRemoveUntil(
+        context, '/main', (route) => false,
+      );
+    }
   }
 
 

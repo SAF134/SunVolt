@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_app_bar.dart';
-import '../../core/widgets/sunvolt_confirmation_dialog.dart';
 import '../../core/widgets/sunvolt_shimmer.dart';
 import '../payment/payment_success_screen.dart';
 
@@ -156,95 +155,216 @@ class _WalletScreenState extends State<WalletScreen> {
 
                         return Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(32),
+                          height: 220,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Color(0xFF006D3D),
-                                Color(0xFF004D2B),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.secondary.withValues(alpha: 0.15),
-                                blurRadius: 24,
-                                offset: const Offset(0, 8),
+                                color: AppColors.secondary.withValues(alpha: 0.3),
+                                blurRadius: 30,
+                                offset: const Offset(0, 15),
+                                spreadRadius: -5,
                               ),
                             ],
                           ),
-                          child: snapshot.connectionState == ConnectionState.waiting
-                              ? const SunVoltWalletBalanceSkeleton()
-                              : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'SALDO DOMPET TERSEDIA',
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 12, fontWeight: FontWeight.w700,
-                                      letterSpacing: 1.5, color: Colors.white70,
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withValues(alpha: 0.2),
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.verified, color: AppColors.primaryContainer, size: 14),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          'Aktif',
-                                          style: GoogleFonts.manrope(
-                                            fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white,
-                                          ),
-                                        ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: Stack(
+                              children: [
+                                // Base dark emerald gradient background
+                                Container(
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Color(0xFF0F2017), // Very dark emerald
+                                        Color(0xFF042F1A), // Deep dark green
+                                        Color(0xFF02170E), // Almost black green
                                       ],
                                     ),
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.account_balance_wallet_rounded,
-                                    color: AppColors.primaryContainer,
-                                    size: 32,
+                                ),
+                                // Subtle geometric background pattern (concentric rings & diagonal lines)
+                                Positioned.fill(
+                                  child: CustomPaint(
+                                    painter: CardPatternPainter(),
                                   ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    _currencyFormat.format(balance),
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 40,
-                                      fontWeight: FontWeight.w800,
-                                      color: Colors.white,
-                                      letterSpacing: -1,
+                                ),
+                                // Clean border overlay
+                                Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: Colors.white.withValues(alpha: 0.1),
+                                      width: 1.5,
                                     ),
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  const Icon(Icons.bolt, color: AppColors.primaryContainer, size: 16),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${energy.toStringAsFixed(2)} kWh Total Energi',
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                ),
+                                // Content
+                                Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: snapshot.connectionState == ConnectionState.waiting
+                                      ? const Center(
+                                          child: SunVoltWalletBalanceSkeleton(),
+                                        )
+                                      : Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            // Header Row: Card title & Active Chip
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'SUNVOLT PAY',
+                                                      style: GoogleFonts.spaceGrotesk(
+                                                        fontSize: 14,
+                                                        fontWeight: FontWeight.w700,
+                                                        letterSpacing: 2.0,
+                                                        color: AppColors.primary,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 2),
+                                                    Text(
+                                                      'Saldo Tersedia',
+                                                      style: GoogleFonts.manrope(
+                                                        fontSize: 11,
+                                                        fontWeight: FontWeight.w500,
+                                                        letterSpacing: 0.5,
+                                                        color: Colors.white.withValues(alpha: 0.5),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white.withValues(alpha: 0.06),
+                                                    borderRadius: BorderRadius.circular(999),
+                                                    border: Border.all(
+                                                      color: Colors.white.withValues(alpha: 0.1),
+                                                      width: 1,
+                                                    ),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Container(
+                                                        width: 6,
+                                                        height: 6,
+                                                        decoration: const BoxDecoration(
+                                                          shape: BoxShape.circle,
+                                                          color: Color(0xFF22C55E), // Neon green dot
+                                                          boxShadow: [
+                                                            BoxShadow(
+                                                              color: Color(0xFF22C55E),
+                                                              blurRadius: 6,
+                                                              spreadRadius: 1,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 6),
+                                                      Text(
+                                                        'Aktif',
+                                                        style: GoogleFonts.manrope(
+                                                          fontSize: 11,
+                                                          fontWeight: FontWeight.w700,
+                                                          color: Colors.white.withValues(alpha: 0.9),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            // Middle Row: Big Balance Display
+                                            Row(
+                                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                                              textBaseline: TextBaseline.alphabetic,
+                                              children: [
+                                                Text(
+                                                  'Rp',
+                                                  style: GoogleFonts.spaceGrotesk(
+                                                    fontSize: 22,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.white.withValues(alpha: 0.8),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Expanded(
+                                                  child: FittedBox(
+                                                    fit: BoxFit.scaleDown,
+                                                    alignment: Alignment.centerLeft,
+                                                    child: Text(
+                                                      _currencyFormat.format(balance).replaceAll('Rp', '').trim(),
+                                                      style: GoogleFonts.spaceGrotesk(
+                                                        fontSize: 42,
+                                                        fontWeight: FontWeight.w700,
+                                                        color: Colors.white,
+                                                        letterSpacing: -1,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            // Footer Row: kWh Equivalent & User Cardholder info
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                // Energy Equivalent Pill
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                  decoration: BoxDecoration(
+                                                    color: AppColors.primary.withValues(alpha: 0.08),
+                                                    borderRadius: BorderRadius.circular(10),
+                                                    border: Border.all(
+                                                      color: AppColors.primary.withValues(alpha: 0.15),
+                                                      width: 1,
+                                                    ),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      const Icon(
+                                                        Icons.bolt_rounded,
+                                                        color: AppColors.primary,
+                                                        size: 16,
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Text(
+                                                        '~ ${energy.toStringAsFixed(2)} kWh',
+                                                        style: GoogleFonts.spaceGrotesk(
+                                                          fontSize: 13,
+                                                          fontWeight: FontWeight.w700,
+                                                          color: AppColors.primary,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                // User's name
+                                                Text(
+                                                  user?.displayName?.toUpperCase() ?? 'PENGGUNA SUNVOLT',
+                                                  style: GoogleFonts.spaceGrotesk(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                    letterSpacing: 1.0,
+                                                    color: Colors.white.withValues(alpha: 0.6),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },
@@ -308,15 +428,10 @@ class _WalletScreenState extends State<WalletScreen> {
                       height: 60,
                       child: ElevatedButton(
                         onPressed: () {
-                          SunVoltConfirmationDialog.show(
+                          Navigator.pushNamed(
                             context,
-                            title: 'Konfirmasi Top Up',
-                            message: 'Apakah Anda yakin ingin melakukan pengisian saldo sebesar $_selectedAmount?',
-                            onConfirm: () => Navigator.pushNamed(
-                              context,
-                              '/qris-payment',
-                              arguments: _selectedAmount,
-                            ),
+                            '/qris-payment',
+                            arguments: _selectedAmount,
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -345,7 +460,7 @@ class _WalletScreenState extends State<WalletScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  SizedBox(height: 100 + MediaQuery.paddingOf(context).bottom),
                 ],
               ),
             ),
@@ -376,60 +491,112 @@ class TopUpOptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final borderGradient = isSelected
+        ? const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFF00B050)])
+        : LinearGradient(colors: [
+            AppColors.outlineVariant.withValues(alpha: 0.25),
+            AppColors.outlineVariant.withValues(alpha: 0.08),
+          ]);
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryContainer : AppColors.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(16),
-          border: isSelected ? null : Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.3)),
-          boxShadow: isSelected ? [
+          gradient: borderGradient,
+          boxShadow: [
             BoxShadow(
-              color: AppColors.primaryContainer.withValues(alpha: 0.3),
+              color: isSelected
+                  ? AppColors.primaryContainer.withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.03),
               blurRadius: 12,
               offset: const Offset(0, 4),
-            )
-          ] : null,
+            ),
+          ],
         ),
-        child: Column(
-          children: [
-            if (tag != null) ...[
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.white.withValues(alpha: 0.5) : AppColors.primaryContainer.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(999),
+        padding: const EdgeInsets.all(1.5),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14.5, horizontal: 6.5),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primaryContainer : AppColors.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(14.5),
+          ),
+          child: Column(
+            children: [
+              if (tag != null) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.white.withValues(alpha: 0.5) : AppColors.primaryContainer.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    tag!,
+                    style: GoogleFonts.manrope(
+                      fontSize: 9, fontWeight: FontWeight.w700,
+                      color: AppColors.onPrimaryContainer, letterSpacing: 0.5,
+                    ),
+                  ),
                 ),
+                const SizedBox(height: 8),
+              ],
+              FittedBox(
+                fit: BoxFit.scaleDown,
                 child: Text(
-                  tag!,
-                  style: GoogleFonts.manrope(
-                    fontSize: 9, fontWeight: FontWeight.w700,
-                    color: AppColors.onPrimaryContainer, letterSpacing: 0.5,
+                  amount,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14, fontWeight: FontWeight.w700,
+                    color: isSelected ? AppColors.onPrimaryContainer : AppColors.onSurface,
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  energy,
+                  style: GoogleFonts.manrope(
+                    fontSize: 11, fontWeight: FontWeight.w500,
+                    color: isSelected ? AppColors.onPrimaryContainer.withValues(alpha: 0.7) : AppColors.onSurfaceVariant,
+                  ),
+                ),
+              ),
             ],
-            Text(
-              amount,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14, fontWeight: FontWeight.w700,
-                color: isSelected ? AppColors.onPrimaryContainer : AppColors.onSurface,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              energy,
-              style: GoogleFonts.manrope(
-                fontSize: 11, fontWeight: FontWeight.w500,
-                color: isSelected ? AppColors.onPrimaryContainer.withValues(alpha: 0.7) : AppColors.onSurfaceVariant,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
+}
+
+class CardPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.03)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    // Draw some subtle concentric circles centered at top right
+    final center = Offset(size.width * 0.9, size.height * 0.1);
+    for (double radius = 40; radius < size.width; radius += 40) {
+      canvas.drawCircle(center, radius, paint);
+    }
+
+    // Draw some fine diagonal background lines
+    final linePaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.015)
+      ..strokeWidth = 1.0;
+    for (double i = -size.height; i < size.width; i += 24) {
+      canvas.drawLine(
+        Offset(i, 0),
+        Offset(i + size.height, size.height),
+        linePaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

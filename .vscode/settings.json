@@ -1,5 +1,5 @@
 {
-  "files.autoSave": "afterDelay",
+  "files.autoSave": "off",
   "dart.flutterHotReloadOnSave": "all",
   "java.configuration.updateBuildConfiguration": "interactive"
 }

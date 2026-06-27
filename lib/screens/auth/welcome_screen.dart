@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
@@ -41,244 +42,341 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Hero section
-            Padding(
-              padding: const EdgeInsets.fromLTRB(32, 48, 32, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Logo
-                  Row(
-                    children: [
-                      Image.asset(
-                        'assets/images/Logo_SunVolt.png',
-                        width: 42,
-                        height: 42,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(width: 4),
-                      RichText(
-                        text: TextSpan(
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1,
+      backgroundColor: AppColors.surfaceContainerLowest,
+      body: Stack(
+        children: [
+          // Background Glow Blurs
+          Positioned(
+            top: -100,
+            right: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFD700).withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 50,
+            left: -150,
+            child: Container(
+              width: 350,
+              height: 350,
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withValues(alpha: 0.06),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Hero section
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(32, 48, 32, 0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Sub-badge
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.secondary.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    'REVOLUSI ENERGI BERSIH',
+                                    style: GoogleFonts.spaceGrotesk(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 1.5,
+                                      color: AppColors.secondary,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                // Headline
+                                RichText(
+                                  text: TextSpan(
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 34,
+                                      fontWeight: FontWeight.w800,
+                                      height: 1.2,
+                                      letterSpacing: -1,
+                                      color: AppColors.onBackground,
+                                    ),
+                                    children: [
+                                      const TextSpan(text: 'Selamat Datang di '),
+                                      TextSpan(
+                                        text: 'Sun',
+                                        style: TextStyle(color: AppColors.primary),
+                                      ),
+                                      TextSpan(
+                                        text: 'Volt',
+                                        style: TextStyle(color: AppColors.secondary),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Nyalakan masa depan Anda dengan energi bersih, cerdas, dan berkelanjutan.',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 15,
+                                    color: AppColors.onSurfaceVariant,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          children: const [
-                            TextSpan(
-                              text: 'Sun',
-                              style: TextStyle(color: AppColors.yellowAccent400),
+                      const SizedBox(height: 32),
+                      // Illustration Card
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Container(
+                          height: 300,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(28),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 32,
+                                offset: const Offset(0, 12),
+                                spreadRadius: -4,
+                              ),
+                            ],
+                          ),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(28),
+                                child: Image.network(
+                                  'https://lh3.googleusercontent.com/aida-public/AB6AXuBZVFAkLwMArvfyzQtsgLdHmVAJ2aKb7v2KuH7uxkkqz6UjxmxOBcvxa-iHBVFMESpz9XNqTMVJiLfaN58r8aeKzAGBWDxMIlFFwYvCe5psNAsUIuRMcVtOqDo2K2YMD3NcB3e_bqs6mRbAoLkHyBnJ0e9kX4Xm7wStC570991cUoLOVZivl_A_DcWiU0UXrCU4DKPgS_NfwL6SzQlCrV-OtwcLQocVB5br38_cgwh-N6IWcrXw1fGZRkZobJO2NAXVHWVfQZME9Jc',
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: AppColors.surfaceContainerHigh,
+                                      child: const Center(
+                                        child: Icon(
+                                          Icons.solar_power_rounded,
+                                          size: 80,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              // Glassmorphic Badge with real blur
+                              Positioned(
+                                bottom: 20,
+                                left: 20,
+                                right: 20,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: BackdropFilter(
+                                    filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: Colors.white.withValues(alpha: 0.25),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.secondary.withValues(alpha: 0.2),
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: AppColors.secondary.withValues(alpha: 0.3),
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: const Icon(
+                                              Icons.eco_rounded,
+                                              color: AppColors.secondary,
+                                              size: 22,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Energi Terbarukan',
+                                                  style: GoogleFonts.plusJakartaSans(
+                                                    fontWeight: FontWeight.w800,
+                                                    fontSize: 15,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  '100% Ramah Lingkungan',
+                                                  style: GoogleFonts.manrope(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.white.withValues(alpha: 0.75),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      
+                      // Google Sign-In Button
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                        child: Column(
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              height: 58,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFFFFF176),
+                                    Color(0xFFF5C400),
+                                  ],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              padding: const EdgeInsets.all(1.5),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(18.5),
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFFFFD700),
+                                      Color(0xFFE5B200),
+                                    ],
+                                  ),
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: _isLoading ? null : _handleGoogleSignIn,
+                                    borderRadius: BorderRadius.circular(18.5),
+                                    child: Center(
+                                      child: _isLoading
+                                          ? const SizedBox(
+                                              width: 24,
+                                              height: 24,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF221B00)),
+                                              ),
+                                            )
+                                          : Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.all(6),
+                                                  decoration: const BoxDecoration(
+                                                    color: Colors.white,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Image.asset(
+                                                    'assets/images/google.png',
+                                                    height: 18,
+                                                    errorBuilder: (context, error, stackTrace) =>
+                                                        const Icon(Icons.g_mobiledata, size: 18, color: Colors.black),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Text(
+                                                  'Masuk dengan Akun Google',
+                                                  style: GoogleFonts.plusJakartaSans(
+                                                    fontWeight: FontWeight.w800,
+                                                    fontSize: 16,
+                                                    color: const Color(0xFF221B00),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
-                            TextSpan(
-                              text: 'Volt',
-                              style: TextStyle(color: AppColors.voltGreen),
+                            const SizedBox(height: 24),
+                            // ToS
+                            RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                style: GoogleFonts.manrope(
+                                  fontSize: 13,
+                                  color: AppColors.onSurfaceVariant,
+                                ),
+                                children: [
+                                  const TextSpan(
+                                    text: 'Dengan melanjutkan, Anda menyetujui ',
+                                  ),
+                                  TextSpan(
+                                    text: 'Ketentuan Layanan',
+                                    style: TextStyle(
+                                      color: AppColors.secondary,
+                                      fontWeight: FontWeight.w700,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                            const SizedBox(height: 32),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
-                  // Headline
-                  RichText(
-                    text: TextSpan(
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 36,
-                        fontWeight: FontWeight.w800,
-                        height: 1.1,
-                        color: AppColors.onBackground,
-                      ),
-                      children: [
-                        const TextSpan(text: 'Selamat Datang di '),
-                        TextSpan(
-                          text: 'Sun',
-                          style: TextStyle(color: AppColors.yellowAccent400),
-                        ),
-                        TextSpan(
-                          text: 'Volt',
-                          style: TextStyle(color: AppColors.voltGreen),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Nyalakan masa depan Anda dengan energi bersih dan berkelanjutan.',
-                    style: GoogleFonts.manrope(
-                      fontSize: 16,
-                      color: AppColors.onSurfaceVariant,
-                      height: 1.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Illustration
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.network(
-                        'https://lh3.googleusercontent.com/aida-public/AB6AXuBZVFAkLwMArvfyzQtsgLdHmVAJ2aKb7v2KuH7uxkkqz6UjxmxOBcvxa-iHBVFMESpz9XNqTMVJiLfaN58r8aeKzAGBWDxMIlFFwYvCe5psNAsUIuRMcVtOqDo2K2YMD3NcB3e_bqs6mRbAoLkHyBnJ0e9kX4Xm7wStC570991cUoLOVZivl_A_DcWiU0UXrCU4DKPgS_NfwL6SzQlCrV-OtwcLQocVB5br38_cgwh-N6IWcrXw1fGZRkZobJO2NAXVHWVfQZME9Jc',
-                        width: double.infinity,
-                        height: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: AppColors.surfaceContainerHigh,
-                            child: const Center(
-                              child: Icon(
-                                Icons.solar_power,
-                                size: 80,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    // Glassmorphism badge
-                    Positioned(
-                      bottom: 24,
-                      left: 24,
-                      right: 24,
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryContainer,
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              child: const Icon(
-                                Icons.eco,
-                                color: AppColors.onPrimaryContainer,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Energi Terbarukan',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.onBackground,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '100% Ramah Lingkungan',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 12,
-                                    color: AppColors.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            // Google Sign-In Button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: OutlinedButton(
-                      onPressed: _isLoading ? null : _handleGoogleSignIn,
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        side: const BorderSide(
-                          color: AppColors.primaryContainer,
-                        ),
-                        backgroundColor: AppColors.primaryContainer,
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  'assets/images/google.png',
-                                  height: 24,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(Icons.g_mobiledata, size: 30),
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  'Masuk dengan Akun Google',
-                                  style: GoogleFonts.manrope(
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.onPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // ToS
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: GoogleFonts.manrope(
-                        fontSize: 13,
-                        color: AppColors.onSurfaceVariant,
-                      ),
-                      children: [
-                        const TextSpan(
-                          text: 'Dengan melanjutkan, Anda menyetujui ',
-                        ),
-                        TextSpan(
-                          text: 'Ketentuan Layanan',
-                          style: TextStyle(
-                            color: AppColors.secondary,
-                            fontWeight: FontWeight.w700,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
-          ],
+            );
+          },
         ),
       ),
-    );
-  }
+    ],
+  ),
+);
+}
 }

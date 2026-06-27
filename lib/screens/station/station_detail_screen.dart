@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_app_bar.dart';
 import '../../core/widgets/sunvolt_confirmation_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
@@ -20,21 +22,47 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
     locale: 'id', symbol: '', decimalDigits: 0,
   );
 
+  late final FirebaseFirestore _secondaryFirestore;
+  StreamSubscription? _stationSubscription;
+  String _relayDCState = 'OFF';
+  String _relayACState = 'OFF';
+  String _vehicleType = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _secondaryFirestore = FirebaseFirestore.instanceFor(app: Firebase.app('secondary'));
+    _stationSubscription = _secondaryFirestore
+        .collection('stations')
+        .doc('station_01')
+        .snapshots()
+        .listen((snapshot) {
+      if (!mounted) return;
+      if (snapshot.exists) {
+        final data = snapshot.data();
+        if (data != null) {
+          setState(() {
+            _relayDCState = data['relayDCState'] as String? ?? 'OFF';
+            _relayACState = data['relayACState'] as String? ?? 'OFF';
+            _vehicleType = data['vehicle_type'] as String? ?? '';
+          });
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _stationSubscription?.cancel();
+    super.dispose();
+  }
+
+
   // ─── Spesifikasi Kendaraan ───
-  static const double _bikeVoltage = 48.0;
-  static const double _bikeAh = 20.0;
-  static const double _bikeCapacityKWh = _bikeVoltage * _bikeAh / 1000; // 0.96
-  static const double _motorVoltage = 72.0;
-  static const double _motorAh = 30.0;
-  static const double _motorCapacityKWh = _motorVoltage * _motorAh / 1000; // 2.16
-  static const double _tariffPerKWh = 2500.0;
+  // Biaya pengisian minimal 15% → 100% (85%)
+  static const int _bikeFullCost = 2400;
+  static const int _motorFullCost = 5400;
 
-  // Biaya pengisian 15% → 100% (85%)
-  static const int _bikeFullCost = 2400;  // 0.96 × 0.85 × 2500 ≈ 2040, dibulatkan ke atas
-  static const int _motorFullCost = 5400; // 2.16 × 0.85 × 2500 ≈ 4590, dibulatkan ke atas
-
-  double get _selectedCapacity =>
-      _selectedVehicle == 1 ? _motorCapacityKWh : _bikeCapacityKWh;
   int get _selectedMinBalance =>
       _selectedVehicle == 1 ? _motorFullCost : _bikeFullCost;
   String get _selectedVehicleName =>
@@ -111,23 +139,6 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                                   ],
                                 ),
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.secondaryContainer,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Text(
-                                  'Tersedia',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.onSecondaryContainer,
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                         ),
@@ -139,66 +150,79 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceContainerLowest,
-                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: AppColors.primaryContainer.withValues(alpha: 0.3),
+                          color: Colors.black.withValues(alpha: 0.04),
+                          width: 1.0,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 16,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
-                      child: Column(
+                      child: Row(
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryContainer.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Icon(
-                                  Icons.bolt_rounded,
-                                  color: AppColors.primaryContainer,
-                                  size: 24,
-                                ),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFD700).withValues(alpha: 0.12),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+                                width: 1,
                               ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                            ),
+                            child: const Icon(
+                              Icons.bolt_rounded,
+                              color: Color(0xFFD4AF37),
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'TARIF PENGISIAN LISTRIK',
+                                  style: GoogleFonts.spaceGrotesk(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1.5,
+                                    color: AppColors.onSurfaceVariant.withValues(alpha: 0.6),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
                                   children: [
                                     Text(
-                                      'Tarif Listrik',
+                                      'Rp 2.500',
+                                      style: GoogleFonts.spaceGrotesk(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.onSurface,
+                                      ),
+                                    ),
+                                    Text(
+                                      ' / kWh',
                                       style: GoogleFonts.manrope(
                                         fontSize: 13,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.w600,
                                         color: AppColors.onSurfaceVariant,
                                       ),
                                     ),
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.account_balance_wallet_rounded,
-                                          color: AppColors.primaryContainer,
-                                          size: 18,
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          'Rp 2.500 / kWh',
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w800,
-                                            color: AppColors.onSurface,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
                                   ],
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -238,9 +262,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
-
-                  const SizedBox(height: 120),
+                             SizedBox(height: 100 + MediaQuery.paddingOf(context).bottom),
                 ],
               ),
             ),
@@ -249,86 +271,191 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
       ),
       // Bottom CTA
       bottomSheet: Container(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.9),
         ),
-        child: SizedBox(
-          width: double.infinity,
-          height: 60,
-          child: ElevatedButton.icon(
-            onPressed: () async {
-              final user = FirebaseAuth.instance.currentUser;
-              if (user == null) return;
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+            child: SizedBox(
+              width: double.infinity,
+              height: 60,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user == null) return;
 
-              // Ambil saldo terbaru dari Firestore
-              final userDoc = await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(user.uid)
-                  .get();
-              final int currentBalance = userDoc.data()?['balance'] ?? 0;
-              final int minBalance = _selectedMinBalance;
-              final String vehicleName = _selectedVehicleName;
-
-              if (currentBalance < minBalance) {
-                if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Row(
-                        children: [
-                          const Icon(Icons.warning_amber_rounded,
-                              color: Colors.white),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Saldo Anda Rp ${_currencyFormat.format(currentBalance).trim()} tidak mencukupi! Minimal Rp ${_currencyFormat.format(minBalance).trim()} untuk $vehicleName.',
-                              style: GoogleFonts.manrope(
-                                  fontWeight: FontWeight.w600),
-                            ),
+                  // Cek apakah relay aktif dan slot sedang dipakai
+                  if (_selectedVehicle == 0) {
+                    if (_relayDCState != 'ON') {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.warning_amber_rounded, color: Colors.white),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Relay DC tidak aktif. Pengisian daya tidak dapat dimulai.',
+                                  style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      backgroundColor: Colors.redAccent,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                      margin: const EdgeInsets.all(24),
-                    ),
-                  );
-                return;
-              }
+                          backgroundColor: Colors.redAccent,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          margin: const EdgeInsets.all(24),
+                        ),
+                      );
+                      return;
+                    }
+                    if (_vehicleType == 'bike') {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.block_rounded, color: Colors.white),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Slot sepeda listrik sedang terpakai oleh pengguna lain.',
+                                  style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Colors.redAccent,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          margin: const EdgeInsets.all(24),
+                        ),
+                      );
+                      return;
+                    }
+                  }
 
-              if (!context.mounted) return;
-              SunVoltConfirmationDialog.show(
-                context,
-                  title: 'Konfirmasi Pengisian',
-                  message:
-                      'Mulai mengisi daya $vehicleName?\n\n'
-                      'Estimasi biaya: Rp ${_currencyFormat.format((_selectedCapacity * 0.85 * _tariffPerKWh).round()).trim()}\n'
-                      'Saldo Anda: Rp ${_currencyFormat.format(currentBalance).trim()}',
-                  onConfirm: () => Navigator.pushNamed(
+                  if (_selectedVehicle == 1) {
+                    if (_relayACState != 'ON') {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.warning_amber_rounded, color: Colors.white),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Relay AC tidak aktif. Pengisian daya tidak dapat dimulai.',
+                                  style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Colors.redAccent,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          margin: const EdgeInsets.all(24),
+                        ),
+                      );
+                      return;
+                    }
+                    if (_vehicleType == 'motor') {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.block_rounded, color: Colors.white),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Slot motor listrik sedang terpakai oleh pengguna lain.',
+                                  style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Colors.redAccent,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          margin: const EdgeInsets.all(24),
+                        ),
+                      );
+                      return;
+                    }
+                  }
+ 
+                  // Ambil saldo terbaru dari Firestore
+                  final userDoc = await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(user.uid)
+                      .get();
+                  final int currentBalance = userDoc.data()?['balance'] ?? 0;
+                  final int minBalance = _selectedMinBalance;
+                  final String vehicleName = _selectedVehicleName;
+ 
+                  if (currentBalance < minBalance) {
+                    if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.warning_amber_rounded,
+                                  color: Colors.white),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Saldo Anda Rp ${_currencyFormat.format(currentBalance).trim()} tidak mencukupi! Minimal Rp ${_currencyFormat.format(minBalance).trim()} untuk $vehicleName.',
+                                  style: GoogleFonts.manrope(
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Colors.redAccent,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          margin: const EdgeInsets.all(24),
+                        ),
+                      );
+                    return;
+                  }
+ 
+                  if (!context.mounted) return;
+                  SunVoltConfirmationDialog.show(
                     context,
-                    '/charging-status',
-                    arguments: _selectedVehicle == 1 ? 'motor' : 'bike',
+                      title: 'Konfirmasi Pengisian',
+                      message: 'Mulai mengisi daya $vehicleName?',
+                      onConfirm: () => Navigator.pushNamed(
+                        context,
+                        '/charging-status',
+                        arguments: _selectedVehicle == 1 ? 'motor' : 'bike',
+                      ),
+                    );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryContainer,
+                  foregroundColor: AppColors.onPrimaryContainer,
+                  elevation: 4,
+                  shadowColor:
+                      const Color(0xFFEAB308).withValues(alpha: 0.2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryContainer,
-              foregroundColor: AppColors.onPrimaryContainer,
-              elevation: 4,
-              shadowColor:
-                  const Color(0xFFEAB308).withValues(alpha: 0.2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            icon: const Icon(Icons.bolt, size: 24),
-            label: Text(
-              'Mulai Isi Daya',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
+                ),
+                icon: const Icon(Icons.bolt, size: 24),
+                label: Text(
+                  'Mulai Isi Daya',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             ),
           ),
@@ -346,72 +473,162 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
     required String subtitle,
   }) {
     final isSelected = _selectedVehicle == index;
+
+    // Tentukan status slot secara real-time
+    String statusText;
+    Color statusColor;
+    Color statusBgColor;
+    if (index == 0) {
+      if (_relayDCState != 'ON') {
+        statusText = 'Relay Tidak Aktif';
+        statusColor = Colors.grey;
+        statusBgColor = Colors.grey.withValues(alpha: 0.08);
+      } else if (_vehicleType == 'bike') {
+        statusText = 'Sedang Dipakai';
+        statusColor = AppColors.error;
+        statusBgColor = AppColors.error.withValues(alpha: 0.08);
+      } else {
+        statusText = 'Tersedia';
+        statusColor = AppColors.natureGreen;
+        statusBgColor = AppColors.natureGreen.withValues(alpha: 0.08);
+      }
+    } else {
+      if (_relayACState != 'ON') {
+        statusText = 'Relay Tidak Aktif';
+        statusColor = Colors.grey;
+        statusBgColor = Colors.grey.withValues(alpha: 0.08);
+      } else if (_vehicleType == 'motor') {
+        statusText = 'Sedang Dipakai';
+        statusColor = AppColors.error;
+        statusBgColor = AppColors.error.withValues(alpha: 0.08);
+      } else {
+        statusText = 'Tersedia';
+        statusColor = AppColors.natureGreen;
+        statusBgColor = AppColors.natureGreen.withValues(alpha: 0.08);
+      }
+    }
+
     return GestureDetector(
       onTap: () => setState(() => _selectedVehicle = index),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(16),
+          color: isSelected 
+              ? const Color(0xFFFFD700).withValues(alpha: 0.04) 
+              : Colors.white,
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
-                ? AppColors.primaryContainer
-                : Colors.transparent,
-            width: 2,
+                ? const Color(0xFFFFD700)
+                : Colors.black.withValues(alpha: 0.05),
+            width: isSelected ? 1.5 : 1.0,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: const Color(0xFFEAB308).withValues(alpha: 0.05),
-                    blurRadius: 12,
-                  )
-                ]
-              : null,
+          boxShadow: [
+            BoxShadow(
+              color: isSelected
+                  ? const Color(0xFFFFD700).withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.02),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            Container(
-              width: 64,
-              height: 64,
+            // Icon Container
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.primaryContainer
-                    : AppColors.surfaceContainer,
-                borderRadius: BorderRadius.circular(16),
+                    ? const Color(0xFFFFD700)
+                    : AppColors.surfaceContainerLow,
+                shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
-                size: 28,
+                size: 24,
                 color: isSelected
-                    ? AppColors.onPrimaryContainer
+                    ? const Color(0xFF221B00)
                     : AppColors.onSurfaceVariant,
               ),
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 16),
+            
+            // Text Column
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: GoogleFonts.plusJakartaSans(
-                          fontSize: 18, fontWeight: FontWeight.w700)),
+                  Text(
+                    title,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 16, 
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.onSurface,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(subtitle,
-                      style: GoogleFonts.manrope(
-                          fontSize: 14,
-                          color: AppColors.onSurfaceVariant)),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  
+                  // Status Pill Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusBgColor,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: statusColor.withValues(alpha: 0.15),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: statusColor,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          statusText,
+                          style: GoogleFonts.manrope(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: statusColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-            // Radio indicator
-            Container(
-              width: 24,
-              height: 24,
+            
+            // Radio button
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 22,
+              height: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected
-                      ? AppColors.primaryContainer
+                      ? const Color(0xFFFFD700)
                       : AppColors.outlineVariant,
                   width: 2,
                 ),
@@ -419,10 +636,10 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
               child: isSelected
                   ? Center(
                       child: Container(
-                        width: 12,
-                        height: 12,
+                        width: 10,
+                        height: 10,
                         decoration: const BoxDecoration(
-                          color: AppColors.primaryContainer,
+                          color: Color(0xFFFFD700),
                           shape: BoxShape.circle,
                         ),
                       ),

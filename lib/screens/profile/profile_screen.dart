@@ -19,9 +19,7 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const SunVoltAppBar(
-        trailing: SizedBox.shrink(),
-      ),
+      appBar: const SunVoltAppBar(),
       body: Column(
         children: [
           Expanded(
@@ -29,7 +27,7 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
                   // Avatar - show Google profile photo if available
                   Container(
                     width: 100,
@@ -226,7 +224,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 120),
+                  SizedBox(height: 100 + MediaQuery.paddingOf(context).bottom),
                 ],
               ),
             ),
@@ -253,10 +251,21 @@ class ProfileMenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: AppColors.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          color: AppColors.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
@@ -292,6 +301,7 @@ class ProfileMenuItem extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
