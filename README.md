@@ -16,10 +16,19 @@ SunVolt adalah aplikasi mobile berbasis Flutter yang terintegrasi dengan perangk
   - Pemantauan daya pengisian, waktu berjalan, dan biaya secara *real-time* yang disinkronisasi lewat Firebase Cloud Firestore.
   - Fitur *Auto-Stop* ketika baterai penuh atau biaya berjalan telah mencapai batas saldo.
 - **💳 Integrated Digital Wallet**:
-  - Top-up saldo instan melalui simulasi Sanbox Midtrans.
+  - Top-up saldo instan melalui simulasi Sandbox Midtrans.
   - Manajemen riwayat aktivitas pengisian daya dan top-up (termasuk fitur hapus riwayat secara permanen).
-- **🛡️ Keamanan & Konfirmasi**: Alur kerja yang ketat untuk memulai dan menghentikan pengisian daya guna mencegah kesalahan penggunaan.
-- **💎 Desain "Solar Kinetic"**: Antarmuka modern dengan konsep *tonal layering*, *glassmorphism*, dan desain minim garis (*no-line aesthetic*).
+- **🛡️ Keamanan & Konfirmasi**: Alur kerja yang ketat dengan dialog konfirmasi (`SunVoltConfirmationDialog`) untuk memulai/menghentikan pengisian daya dan transaksi guna mencegah kesalahan tindakan pengguna.
+- **✨ Desain Premium "Solar Kinetic" (Pembaruan UI/UX)**:
+  - **Efek Border Bergradien & Bayangan Tebal**: Semua tombol utama, tombol sekunder, dan kartu utama (seperti riwayat, status tarif, daya real-time, pilihan top-up, dan profil) kini menggunakan bingkai bergradien warna emas/hijau dan bayangan melayang dinamis untuk efek visual 3D yang hidup dan menonjol.
+  - **Welcome & Splash Screen Premium**: Splash Screen dengan logo cincin konsentris berputar di bawah pendaran kuning-hijau, serta Welcome Screen berhiaskan lencana *frosted glass* (efek blur nyata) dan tombol masuk Google bersinar.
+  - **Halaman Pembayaran QRIS Premium**: Area pemindai QRIS terbingkai rapi dengan kartu rincian tagihan berwarna gelap (*dark slate metallic*) bersinar nominal kuning emas.
+- **🎬 Animasi Transisi Halus & Interaktif**:
+  - **Transisi Geser Halaman**: Perpindahan antar tab navigasi bawah secara pintar mendeteksi arah geser (dari kiri ke kanan, atau sebaliknya) menggunakan penampil halaman dinamis `AnimatedIndexedStack` dengan kurva perlambatan `Curves.easeInOutCubic`.
+  - **Bouncy Navigation Icon**: Tombol navigasi bawah memiliki efek membal (*bouncy scale* dengan `Curves.easeOutBack`) dan pendaran bayangan kuning neon saat aktif.
+- **🔋 Ketahanan Sesi Latar Belakang (*Session Resiliency*)**:
+  - **Auto-Resume**: Pemulihan otomatis sesi pengisian daya jika aplikasi tidak sengaja ditutup paksa atau perangkat mati. Splash screen akan langsung mendeteksi sesi aktif di Firestore sekunder dan mengarahkan kembali pengguna ke halaman status.
+  - **Kalkulasi Akurat**: Penghitungan waktu durasi pengisian berbasis selisih waktu mutlak (`DateTime.now()`), memastikan kalkulasi tetap akurat 100% meskipun aplikasi tertidur di latar belakang.
 
 ---
 
@@ -30,7 +39,7 @@ SunVolt adalah aplikasi mobile berbasis Flutter yang terintegrasi dengan perangk
 - **State Management**: Stateful Widgets & Centralized Services
 - **Database & Auth**: [Firebase Ecosystem](https://firebase.google.com) (Firestore & Authentication)
 - **Map & Location**: `flutter_map` (OpenStreetMap), `geolocator`, `http` (API OSRM)
-- **UI & Animation**: `google_fonts`, Custom Animations
+- **UI & Animation**: `google_fonts`, Custom Animations, BackdropFilter (Glassmorphism)
 
 ### Hardware & IoT
 - **Microcontroller**: ESP32 Dev Module (Komunikasi Wi-Fi ke Firebase Firestore)
@@ -45,12 +54,22 @@ SunVolt/
 ├── android/        # Konfigurasi platform Android
 ├── esp32/          # Kode program C++ (.ino) untuk mikrokontroler ESP32
 ├── lib/
-│   ├── core/       # Tema, warna, navigasi, dan widget global
+│   ├── core/       # Tema, warna, navigasi, dan widget global (Button, AppBar, BottomNav)
 │   ├── models/     # Model representasi data
 │   ├── services/   # Logika interaksi dengan Firebase (Auth & Firestore)
-│   └── screens/    # Antarmuka UI per modul (Home, Peta, Wallet, Riwayat)
+│   └── screens/    # Antarmuka UI per modul (Home, Peta, Wallet, Riwayat, Payment)
 └── pubspec.yaml    # Dependensi dan pustaka Flutter
 ```
+
+---
+
+## 🔒 Perlindungan Kredensial & Keamanan Repository
+
+Demi menjaga keamanan sistem dan rahasia data proyek, konfigurasi repository Git telah diperbarui menggunakan aturan `.gitignore` yang ketat untuk mengabaikan berkas kredensial sensitif:
+- Kunci konfigurasi Firebase (`android/app/google-services.json` dan `ios/Runner/GoogleService-Info.plist`).
+- FlutterFire options (`lib/firebase_options.dart`).
+- Environment variable variables (`.env`, `*.env`).
+- Android Keystore, key properties (`key.properties`), dan local properties build properties (`local.properties`).
 
 ---
 
