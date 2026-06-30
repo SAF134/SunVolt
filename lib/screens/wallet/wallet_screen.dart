@@ -178,9 +178,9 @@ class _WalletScreenState extends State<WalletScreen> {
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                       colors: [
-                                        Color(0xFF0F2017), // Very dark emerald
-                                        Color(0xFF042F1A), // Deep dark green
-                                        Color(0xFF02170E), // Almost black green
+                                        AppColors.greenDark, // Very dark emerald
+                                        AppColors.greenDark, // Deep dark green
+                                        AppColors.greenDark, // Almost black green
                                       ],
                                     ),
                                   ),
@@ -220,8 +220,8 @@ class _WalletScreenState extends State<WalletScreen> {
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      'SUNVOLT PAY',
-                                                      style: GoogleFonts.spaceGrotesk(
+                                                      'DOMPET SUNVOLT',
+                                                      style: GoogleFonts.plusJakartaSans(
                                                         fontSize: 14,
                                                         fontWeight: FontWeight.w700,
                                                         letterSpacing: 2.0,
@@ -258,10 +258,10 @@ class _WalletScreenState extends State<WalletScreen> {
                                                         height: 6,
                                                         decoration: const BoxDecoration(
                                                           shape: BoxShape.circle,
-                                                          color: Color(0xFF22C55E), // Neon green dot
+                                                          color: AppColors.greenLight,
                                                           boxShadow: [
                                                             BoxShadow(
-                                                              color: Color(0xFF22C55E),
+                                                              color: AppColors.greenLight,
                                                               blurRadius: 6,
                                                               spreadRadius: 1,
                                                             ),
@@ -289,7 +289,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                               children: [
                                                 Text(
                                                   'Rp',
-                                                  style: GoogleFonts.spaceGrotesk(
+                                                  style: GoogleFonts.plusJakartaSans(
                                                     fontSize: 22,
                                                     fontWeight: FontWeight.w600,
                                                     color: Colors.white.withValues(alpha: 0.8),
@@ -302,7 +302,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                                     alignment: Alignment.centerLeft,
                                                     child: Text(
                                                       _currencyFormat.format(balance).replaceAll('Rp', '').trim(),
-                                                      style: GoogleFonts.spaceGrotesk(
+                                                      style: GoogleFonts.plusJakartaSans(
                                                         fontSize: 42,
                                                         fontWeight: FontWeight.w700,
                                                         color: Colors.white,
@@ -339,7 +339,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                                       const SizedBox(width: 4),
                                                       Text(
                                                         '~ ${energy.toStringAsFixed(2)} kWh',
-                                                        style: GoogleFonts.spaceGrotesk(
+                                                        style: GoogleFonts.plusJakartaSans(
                                                           fontSize: 13,
                                                           fontWeight: FontWeight.w700,
                                                           color: AppColors.primary,
@@ -351,7 +351,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                                 // User's name
                                                 Text(
                                                   user?.displayName?.toUpperCase() ?? 'PENGGUNA SUNVOLT',
-                                                  style: GoogleFonts.spaceGrotesk(
+                                                  style: GoogleFonts.plusJakartaSans(
                                                     fontSize: 12,
                                                     fontWeight: FontWeight.w600,
                                                     letterSpacing: 1.0,
@@ -438,7 +438,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           backgroundColor: AppColors.primaryContainer,
                           foregroundColor: AppColors.onPrimaryContainer,
                           elevation: 4,
-                          shadowColor: const Color(0xFFEAB308).withValues(alpha: 0.2),
+                          shadowColor: AppColors.yellowAccent.withValues(alpha: 0.2),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -492,7 +492,7 @@ class TopUpOptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderGradient = isSelected
-        ? const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFF00B050)])
+        ? const LinearGradient(colors: [AppColors.primary, AppColors.secondary])
         : LinearGradient(colors: [
             AppColors.outlineVariant.withValues(alpha: 0.25),
             AppColors.outlineVariant.withValues(alpha: 0.08),

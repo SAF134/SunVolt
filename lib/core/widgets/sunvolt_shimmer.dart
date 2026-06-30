@@ -23,8 +23,8 @@ class SunVoltSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: baseColor ?? AppColors.surfaceContainerHigh,
-      highlightColor: highlightColor ?? AppColors.surfaceContainerHighest,
+      baseColor: baseColor ?? AppColors.surfaceContainerLow,
+      highlightColor: highlightColor ?? AppColors.surfaceContainerHigh,
       child: Container(
         width: width,
         height: height,

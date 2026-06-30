@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/widgets/sunvolt_confirmation_dialog.dart';
 
 class QrisPaymentScreen extends StatefulWidget {
   const QrisPaymentScreen({super.key});
@@ -104,7 +103,7 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
               width: 300,
               height: 300,
               decoration: BoxDecoration(
-                color: const Color(0xFFFFD700).withValues(alpha: 0.08),
+                color: AppColors.primary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
             ),
@@ -127,48 +126,39 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
               children: [
                 // App bar
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 24, 12),
+                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
                   child: Row(
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                        color: AppColors.onSurface,
-                        iconSize: 20,
-                        onPressed: () {
-                          SunVoltConfirmationDialog.show(
-                            context,
-                            title: 'Konfirmasi Pembatalan',
-                            message: 'Apakah Anda yakin ingin membatalkan transaksi ini?',
-                            isDestructive: true,
-                            onConfirm: () => Navigator.pop(context),
-                          );
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                      Image.asset(
-                        'assets/images/Logo_SunVolt.png',
-                        width: 32,
-                        height: 32,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(width: 6),
-                      RichText(
-                        text: TextSpan(
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1,
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          children: const [
-                            TextSpan(
-                              text: 'Sun',
-                              style: TextStyle(color: AppColors.yellowAccent400),
-                            ),
-                            TextSpan(
-                              text: 'Volt',
-                              style: TextStyle(color: AppColors.voltGreen),
-                            ),
-                          ],
+                          child: const Icon(
+                            Icons.arrow_back,
+                            color: AppColors.onSurface,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        'Pembayaran',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.onSurface,
                         ),
                       ),
                     ],
@@ -183,7 +173,7 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
                       children: [
                         const SizedBox(height: 12),
                         Text(
-                          'Pembayaran Sanbox Midtrans',
+                          'Pembayaran Sandbox Midtrans',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
@@ -193,7 +183,7 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Klik tombol di bawah untuk mendapatkan Sanbox Midtrans',
+                          'Geser tombol di bawah untuk mendapatkan Sandbox Midtrans',
                           style: GoogleFonts.manrope(
                             fontSize: 14,
                             color: AppColors.onSurfaceVariant.withValues(alpha: 0.8),
@@ -210,7 +200,7 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                const Color(0xFFFFD700).withValues(alpha: 0.3),
+                                AppColors.primary.withValues(alpha: 0.3),
                                 Colors.transparent,
                               ],
                             ),
@@ -230,8 +220,8 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  Color(0xFF1E293B),
-                                  Color(0xFF0F172A),
+                                  AppColors.onSurface,
+                                  AppColors.onSurface,
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(26.5),
@@ -240,7 +230,7 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
                               children: [
                                 Text(
                                   'TOTAL TAGIHAN',
-                                  style: GoogleFonts.spaceGrotesk(
+                                  style: GoogleFonts.plusJakartaSans(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 2.0,
@@ -253,7 +243,7 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 38,
                                     fontWeight: FontWeight.w900,
-                                    color: const Color(0xFFFFD700),
+                                    color: AppColors.primary,
                                     letterSpacing: -1,
                                   ),
                                 ),
@@ -263,7 +253,7 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
                         ),
                         const SizedBox(height: 28),
                         
-                        // QR Code Container (Mock Sanbox Midtrans scanner mockup)
+                        // QR Code Container (Mock Sandbox Midtrans scanner mockup)
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(28),
@@ -304,7 +294,7 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
                                 child: const Icon(
                                   Icons.qr_code_2_rounded,
                                   size: 106,
-                                  color: Color(0xFF0F172A),
+                                  color: AppColors.onSurface,
                                 ),
                               ),
                               const SizedBox(height: 20),
@@ -344,7 +334,7 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  'Tombol bayar di bawah ini akan membuka halaman pembayaran Sandbox Midtrans resmi.',
+                                  'Geser tombol di bawah ini akan membuka halaman pembayaran Sandbox Midtrans resmi.',
                                   style: GoogleFonts.manrope(
                                     fontSize: 13,
                                     color: AppColors.onSurfaceVariant,
@@ -387,118 +377,173 @@ class _QrisPaymentScreenState extends State<QrisPaymentScreen> {
                       child: CircularProgressIndicator(color: AppColors.primary),
                     ),
                   )
-                : Row(
-                    children: [
-                      // Cancel Button
-                      Expanded(
-                        child: SizedBox(
-                          height: 58,
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              SunVoltConfirmationDialog.show(
-                                context,
-                                title: 'Konfirmasi Pembatalan',
-                                message: 'Apakah Anda yakin ingin membatalkan transaksi ini?',
-                                isDestructive: true,
-                                onConfirm: () => Navigator.pop(context),
-                              );
-                            },
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(
-                                color: AppColors.error.withValues(alpha: 0.4),
-                                width: 1.5,
-                              ),
-                              foregroundColor: AppColors.error,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                            ),
-                            icon: const Icon(Icons.close_rounded, size: 20),
-                            label: Text(
-                              'Batalkan',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      // Pay Button
-                      Expanded(
-                        child: Container(
-                          height: 58,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(18),
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFFFFF176),
-                                Color(0xFFF5C400),
-                              ],
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFFFFD700).withValues(alpha: 0.3),
-                                blurRadius: 16,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          padding: const EdgeInsets.all(1.5),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16.5),
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFFFFD700),
-                                  Color(0xFFE5B200),
-                                ],
-                              ),
-                            ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  SunVoltConfirmationDialog.show(
-                                    context,
-                                    title: 'Konfirmasi Pembayaran',
-                                    message: 'Anda akan dialihkan ke halaman pembayaran Midtrans untuk nominal $amount.',
-                                    confirmLabel: 'Ya',
-                                    cancelLabel: 'Tidak',
-                                    onConfirm: () => _createTransaction(amount),
-                                  );
-                                },
-                                borderRadius: BorderRadius.circular(16.5),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.payment_rounded,
-                                      color: Color(0xFF221B00),
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Bayar',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w800,
-                                        color: const Color(0xFF221B00),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                : SwipeToConfirmButton(
+                    onConfirm: () => _createTransaction(amount),
+                    text: 'Geser untuk Membayar',
                   ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class SwipeToConfirmButton extends StatefulWidget {
+  final VoidCallback onConfirm;
+  final String text;
+  final Color backgroundColor;
+  final List<Color> activeGradient;
+
+  const SwipeToConfirmButton({
+    super.key,
+    required this.onConfirm,
+    required this.text,
+    this.backgroundColor = AppColors.surfaceContainerLow,
+    this.activeGradient = const [
+      AppColors.primary,
+      AppColors.yellowDark,
+    ],
+  });
+
+  @override
+  State<SwipeToConfirmButton> createState() => _SwipeToConfirmButtonState();
+}
+
+class _SwipeToConfirmButtonState extends State<SwipeToConfirmButton>
+    with SingleTickerProviderStateMixin {
+  double _dragValue = 0.0;
+  late AnimationController _animController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double maxDragDistance = constraints.maxWidth - 56.0 - 8.0;
+
+        return Container(
+          width: double.infinity,
+          height: 60,
+          decoration: BoxDecoration(
+            color: widget.backgroundColor,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: AppColors.outlineVariant.withValues(alpha: 0.15),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Stack(
+            alignment: Alignment.centerLeft,
+            children: [
+              Container(
+                width: 56 + _dragValue * maxDragDistance,
+                height: 52,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: widget.activeGradient,
+                  ),
+                  borderRadius: BorderRadius.circular(26),
+                ),
+              ),
+              Center(
+                child: Opacity(
+                  opacity: (1 - _dragValue).clamp(0.0, 1.0),
+                  child: Text(
+                    widget.text,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: _dragValue * maxDragDistance,
+                child: GestureDetector(
+                  onHorizontalDragUpdate: (details) {
+                    setState(() {
+                      _dragValue += details.primaryDelta! / maxDragDistance;
+                      _dragValue = _dragValue.clamp(0.0, 1.0);
+                    });
+                  },
+                  onHorizontalDragEnd: (details) {
+                    if (_dragValue > 0.85) {
+                      setState(() {
+                        _dragValue = 1.0;
+                      });
+                      widget.onConfirm();
+                    } else {
+                      final Animation<double> animation = Tween<double>(
+                        begin: _dragValue,
+                        end: 0.0,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: _animController,
+                          curve: Curves.easeOutCubic,
+                        ),
+                      );
+
+                      animation.addListener(() {
+                        setState(() {
+                          _dragValue = animation.value;
+                        });
+                      });
+
+                      _animController.reset();
+                      _animController.forward();
+                    }
+                  },
+                  child: Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.25),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppColors.onPrimaryFixed,
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -63,8 +63,8 @@ class HelpFaqScreen extends StatelessWidget {
                   ),
                   _buildStepCard(
                     '3',
-                    'Scan & Bayar Sanbox Midtrans',
-                    'Gunakan aplikasi e-wallet (GoPay, OVO, Dana) atau Mobile Banking Anda untuk memindai kode Sanbox Midtrans yang tampil.',
+                    'Scan & Bayar Sandbox Midtrans',
+                    'Gunakan aplikasi e-wallet (GoPay, OVO, Dana) atau Mobile Banking Anda untuk memindai kode Sandbox Midtrans yang tampil.',
                   ),
                   _buildStepCard(
                     '4',
@@ -98,13 +98,29 @@ class HelpFaqScreen extends StatelessWidget {
                     'Profil pengisian CC-CV itu apa?',
                     'CC-CV adalah singkatan dari Constant Current (Arus Konstan) dan Constant Voltage (Tegangan Konstan). Mesin akan mengisi arus maksimal saat baterai masih kosong (CC), dan perlahan menurunkan arus saat baterai hampir penuh (CV) untuk melindungi sel baterai agar lebih awet.',
                   ),
+                  _buildFaqItem(
+                    'Bagaimana cara menampilkan rute ke stasiun pengisian?',
+                    'Pada menu peta beranda, ketuk penanda (marker) stasiun SunVolt. Lalu, tekan tombol "Lokasi Saya" (ikon GPS kuning) di bagian kanan atas. Aplikasi akan langsung memetakan rute rute jalan terpendek dengan garis gradien kuning-ke-hijau, lengkap dengan estimasi jarak dan durasi perjalanan.',
+                  ),
+                  _buildFaqItem(
+                    'Bagaimana cara menghentikan pengisian daya?',
+                    'Untuk mencegah terputusnya pengisian daya secara tidak sengaja, SunVolt mengganti tombol klik biasa dengan metode usap (swipe gesture). Cukup geser tombol slider putih bertuliskan "Geser untuk Berhenti" dari kiri ke kanan untuk mematikan aliran listrik.',
+                  ),
+                  _buildFaqItem(
+                    'Apakah saya bisa meminimalkan aplikasi saat pengisian daya berlangsung?',
+                    'Ya, tentu saja. Aplikasi SunVolt dilengkapi dengan fitur sinkronisasi latar belakang. Jika Anda menekan tombol beranda atau meminimalkan aplikasi, sistem akan terus menghitung dan mengakumulasikan pemakaian energi secara real-time. Begitu aplikasi dibuka kembali, data persentase dan biaya pengisian akan diperbarui secara instan.',
+                  ),
+                  _buildFaqItem(
+                    'Bagaimana cara menggunakan panel informasi stasiun?',
+                    'Kami menyediakan lembar detail stasiun bertema Glassmorphism di bagian bawah peta. Anda dapat menyeret (drag) panel tersebut ke atas menggunakan jari untuk membacanya, atau mengusapnya ke bawah untuk menutupnya dengan efek pegas elastis yang halus.',
+                  ),
 
                   const SizedBox(height: 24),
 
                   _buildSectionTitle('FAQ: Dompet & Pembayaran'),
                   _buildFaqItem(
                     'Metode Top-Up apa saja yang didukung?',
-                    'Saat ini kami mendukung metode Sanbox Midtrans. Anda bisa menggunakan berbagai e-wallet (GoPay, OVO, Dana) dan Mobile Banking yang mendukung pembayaran Sanbox Midtrans. Saldo akan otomatis bertambah secara real-time.',
+                    'Saat ini kami mendukung metode Sandbox Midtrans. Anda bisa menggunakan berbagai e-wallet (GoPay, OVO, Dana) dan Mobile Banking yang mendukung pembayaran Sandbox Midtrans. Saldo akan otomatis bertambah secara real-time.',
                   ),
                   _buildFaqItem(
                     'Apakah ada biaya admin untuk Top-Up?',
@@ -113,6 +129,14 @@ class HelpFaqScreen extends StatelessWidget {
                   _buildFaqItem(
                     'Uang saya terpotong tapi saldo tidak bertambah?',
                     'Jika hal ini terjadi, tutup aplikasi Anda lalu buka kembali (refresh). Jika saldo belum juga masuk dalam waktu 10 menit, segera hubungi tim Support dengan melampirkan bukti transfer. Kami akan menyelesaikan masalah Anda segera.',
+                  ),
+                  _buildFaqItem(
+                    'Apakah metode pembayaran Sandbox Midtrans aman?',
+                    'Sangat aman. Setiap transaksi top-up menggunakan metode digital (Qris / E-Wallet) langsung divalidasi oleh sistem server backend kami menggunakan verifikasi tanda tangan kriptografi SHA-512 untuk mencegah manipulasi data saldo.',
+                  ),
+                  _buildFaqItem(
+                    'Bagaimana cara kerja metode Geser untuk Membayar?',
+                    'Pada layar pembayaran, cukup geser tombol bertuliskan "Geser untuk Membayar" ke kanan. Hal ini akan langsung membuat transaksi dan mengarahkan Anda ke halaman tagihan resmi Sandbox Midtrans tanpa melalui pop-up konfirmasi yang berlebihan.',
                   ),
 
                   const SizedBox(height: 24),
@@ -144,7 +168,7 @@ class HelpFaqScreen extends StatelessWidget {
                     Icons.support_agent_rounded,
                     'Hubungi Support Tim',
                     'Waktu respon rata-rata: < 5 menit',
-                    const Color(0xFF25D366),
+                    AppColors.secondary,
                     '081298628236',
                   ),
                   _buildContactCard(
@@ -251,7 +275,7 @@ class HelpFaqScreen extends StatelessWidget {
         const SizedBox(width: 12),
         _categoryItem(Icons.ev_station_rounded, 'Pengisian', AppColors.secondary),
         const SizedBox(width: 12),
-        _categoryItem(Icons.security_rounded, 'Keamanan', const Color(0xFF3B82F6)),
+        _categoryItem(Icons.security_rounded, 'Keamanan', AppColors.secondary),
       ],
     );
   }

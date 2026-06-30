@@ -21,10 +21,10 @@ class AppTheme {
         onSecondary: AppColors.onSecondary,
         secondaryContainer: AppColors.secondaryContainer,
         onSecondaryContainer: AppColors.onSecondaryContainer,
-        tertiary: AppColors.tertiary,
-        onTertiary: AppColors.onTertiary,
-        tertiaryContainer: AppColors.tertiaryContainer,
-        onTertiaryContainer: AppColors.onTertiaryContainer,
+        tertiary: AppColors.secondary,
+        onTertiary: AppColors.onSecondary,
+        tertiaryContainer: AppColors.secondaryContainer,
+        onTertiaryContainer: AppColors.onSecondaryContainer,
         error: AppColors.error,
         onError: AppColors.onError,
         errorContainer: AppColors.errorContainer,
@@ -70,9 +70,9 @@ class AppTheme {
           backgroundColor: AppColors.primaryContainer,
           foregroundColor: AppColors.onPrimaryContainer,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(48),
+            borderRadius: BorderRadius.circular(16),
           ),
           textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 16,
@@ -103,7 +103,7 @@ class AppTheme {
           vertical: 16,
         ),
         hintStyle: GoogleFonts.manrope(
-          color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+          color: AppColors.textTertiary,
         ),
       ),
       cardTheme: CardThemeData(
@@ -117,7 +117,7 @@ class AppTheme {
         backgroundColor: Colors.transparent,
         elevation: 0,
         selectedItemColor: AppColors.onSurface,
-        unselectedItemColor: Color(0xFF71717A),
+        unselectedItemColor: AppColors.textTertiary,
       ),
     );
   }

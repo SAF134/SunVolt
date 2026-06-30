@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_shadows.dart';
 
 class SunVoltAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
@@ -30,13 +31,7 @@ class SunVoltAppBar extends StatelessWidget implements PreferredSizeWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.8),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFEAB308).withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
+        boxShadow: AppShadows.subtle,
       ),
       child: ClipRRect(
         child: BackdropFilter(
@@ -112,11 +107,11 @@ class SunVoltAppBar extends StatelessWidget implements PreferredSizeWidget {
               children: const [
                 TextSpan(
                   text: 'Sun',
-                  style: TextStyle(color: AppColors.yellowAccent400),
+                  style: TextStyle(color: AppColors.yellowAccent),
                 ),
                 TextSpan(
                   text: 'Volt',
-                  style: TextStyle(color: AppColors.voltGreen),
+                  style: TextStyle(color: AppColors.secondary),
                 ),
               ],
             ),

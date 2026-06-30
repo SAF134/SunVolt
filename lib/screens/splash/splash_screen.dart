@@ -6,6 +6,8 @@ import '../../core/services/auth_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../core/widgets/dynamic_aurora_background.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -97,37 +99,9 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surfaceContainerLowest,
-      body: SizedBox(
-        width: double.infinity,
-        height: double.infinity,
+      body: DynamicAuroraBackground(
         child: Stack(
           children: [
-            // Top-left yellow glow
-            Positioned(
-              top: -80,
-              left: -80,
-              child: Container(
-                width: 280,
-                height: 280,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFD700).withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            // Bottom-right green glow
-            Positioned(
-              bottom: -100,
-              right: -100,
-              child: Container(
-                width: 320,
-                height: 320,
-                decoration: BoxDecoration(
-                  color: AppColors.secondary.withValues(alpha: 0.06),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
             // Subtle Leaf decoration at bottom right
             Positioned(
               bottom: 40,
@@ -267,11 +241,11 @@ class _SplashScreenState extends State<SplashScreen>
                           children: [
                             TextSpan(
                               text: 'Sun',
-                              style: TextStyle(color: AppColors.yellowAccent400),
+                              style: TextStyle(color: AppColors.yellowAccent),
                             ),
                             TextSpan(
                               text: 'Volt',
-                              style: TextStyle(color: AppColors.voltGreen),
+                              style: TextStyle(color: AppColors.secondary),
                             ),
                           ],
                         ),

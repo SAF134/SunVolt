@@ -108,14 +108,14 @@ class ProfileScreen extends StatelessWidget {
                       color: (email == 'firecalm2@gmail.com' || 
                               email == 'syauqiakmal137@gmail.com' || 
                               email == 'fattaha.rasyad@gmail.com')
-                          ? AppColors.voltGreen.withValues(alpha: 0.1)
+                          ? AppColors.secondary.withValues(alpha: 0.1)
                           : AppColors.primaryContainer.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: (email == 'firecalm2@gmail.com' || 
                                 email == 'syauqiakmal137@gmail.com' || 
                                 email == 'fattaha.rasyad@gmail.com')
-                            ? AppColors.voltGreen.withValues(alpha: 0.2)
+                            ? AppColors.secondary.withValues(alpha: 0.2)
                             : AppColors.primaryContainer.withValues(alpha: 0.2),
                       ),
                     ),
@@ -131,7 +131,7 @@ class ProfileScreen extends StatelessWidget {
                         color: (email == 'firecalm2@gmail.com' || 
                                 email == 'syauqiakmal137@gmail.com' || 
                                 email == 'fattaha.rasyad@gmail.com')
-                            ? AppColors.voltGreen
+                            ? AppColors.secondary
                             : AppColors.onPrimaryContainer,
                       ),
                     ),
@@ -168,8 +168,8 @@ class ProfileScreen extends StatelessWidget {
                         );
                       },
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.voltGreen,
-                        side: BorderSide(color: AppColors.voltGreen.withValues(alpha: 0.2)),
+                        foregroundColor: AppColors.secondary,
+                        side: BorderSide(color: AppColors.secondary.withValues(alpha: 0.2)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),

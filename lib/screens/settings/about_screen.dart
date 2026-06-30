@@ -19,13 +19,13 @@ class AboutScreen extends StatelessWidget {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               child: Column(
                 children: [
                   // Logo with sophisticated shadow & animation-like feel
                   _buildPremiumLogo(),
                   
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   
                   // App Name
                   RichText(
@@ -38,21 +38,17 @@ class AboutScreen extends StatelessWidget {
                       children: const [
                         TextSpan(
                           text: 'Sun',
-                          style: TextStyle(color: AppColors.yellowAccent400),
+                          style: TextStyle(color: AppColors.yellowAccent),
                         ),
                         TextSpan(
                           text: 'Volt',
-                          style: TextStyle(color: AppColors.voltGreen),
+                          style: TextStyle(color: AppColors.secondary),
                         ),
                       ],
                     ),
                   ),
                   
-                  const SizedBox(height: 8),
-                  
-                  _buildVersionBadge(),
-
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 32),
                   
                   // Mission Statement
                   _buildCard(
@@ -71,7 +67,7 @@ class AboutScreen extends StatelessWidget {
                           'SunVolt lahir dari ambisi untuk merevolusi ekosistem energi di Indonesia. Melalui bahasa desain "Solar Kinetic", kami menghadirkan harmoni antara efisiensi energi surya dan kecepatan mobilitas elektrik.',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.manrope(
-                            fontSize: 15,
+                            fontSize: 14,
                             height: 1.8,
                             color: AppColors.onSurfaceVariant,
                             fontWeight: FontWeight.w500,
@@ -82,7 +78,7 @@ class AboutScreen extends StatelessWidget {
                           'Tujuan kami bukan sekadar menyediakan stasiun pengisian, namun membentuk gaya hidup berkelanjutan dengan transparansi penuh untuk masa depan bumi yang jauh lebih bersih.',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.manrope(
-                            fontSize: 15,
+                            fontSize: 14,
                             height: 1.8,
                             color: AppColors.onSurfaceVariant.withValues(alpha: 0.8),
                             fontWeight: FontWeight.w500,
@@ -92,7 +88,7 @@ class AboutScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
 
                   // Key Features
                   _buildSectionTitle('Fitur Unggulan SunVolt'),
@@ -104,34 +100,38 @@ class AboutScreen extends StatelessWidget {
                     desc: 'Profil kelistrikan yang otomatis menyesuaikan daya (Arus/Tegangan) demi menjaga keawetan dan kesehatan baterai secara jangka panjang.',
                   ),
                   _buildFeatureCard(
-                    icon: Icons.qr_code_scanner_rounded,
-                    color: AppColors.primaryContainer,
-                    title: 'Seamless Sanbox Midtrans Payment',
-                    desc: 'Integrasi e-wallet otomatis dan pemotongan saldo berjalan (Auto-Stop) sehingga Anda hanya membayar daya yang benar-benar terserap.',
+                    icon: Icons.layers_rounded,
+                    color: AppColors.primary,
+                    title: 'Interactive Glassmorphic Panel',
+                    desc: 'Lembar detail stasiun melayang berbasis Glassmorphism yang interaktif dengan gestur usap jari dan efek memantul (spring physics).',
                   ),
                   _buildFeatureCard(
-                    icon: Icons.android_rounded,
-                    color: const Color(0xFFEAB308),
-                    title: 'Eksklusif Mobile Android',
-                    desc: 'Aplikasi SunVolt dikembangkan dan dioptimalkan secara eksklusif untuk platform mobile Android guna sinkronisasi data relay dan transaksi yang stabil.',
+                    icon: Icons.settings_backup_restore_rounded,
+                    color: AppColors.secondary,
+                    title: 'Background Session Keep-Alive',
+                    desc: 'Pelacakan dan sinkronisasi sesi pengisian daya secara presisi saat aplikasi diminimalkan menggunakan WidgetsBindingObserver.',
+                  ),
+                  _buildFeatureCard(
+                    icon: Icons.swipe_rounded,
+                    color: AppColors.error,
+                    title: 'Anti-Accidental Swipe Gestures',
+                    desc: 'Metode kendali usap (swipe) untuk pembayaran dan penghentian sesi pengisian daya guna menghindari penekanan tombol yang tidak disengaja.',
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
 
                   // Tech Stack & Info
                   _buildSectionTitle('Sistem & Hardware'),
                   const SizedBox(height: 16),
                   _buildInfoCard([
-                    _infoEntry('Software', 'Flutter (Android SDK) & Firebase'),
+                    _infoEntry('Software Stack', 'Flutter (Android SDK) & Node.js Vercel'),
+                    _infoEntry('Cloud Database', 'Google Cloud Firestore Real-time'),
                     _infoEntry('Microcontroller', 'ESP32 Dev Module (IoT Relay)'),
                     _infoEntry('Sensor Kelistrikan', 'ACS712 (Real-time Current)'),
-                    _infoEntry('Protokol', 'Wi-Fi ke Cloud Firestore'),
+                    _infoEntry('Routing API', 'Open Source Routing Machine (OSRM)'),
                   ]),
 
-                  const SizedBox(height: 64),
-                  
-
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 48),
                 ],
               ),
             ),
@@ -143,11 +143,11 @@ class AboutScreen extends StatelessWidget {
 
   Widget _buildPremiumLogo() {
     return Container(
-      width: 140,
-      height: 140,
+      width: 120,
+      height: 120,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(40),
+        borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withValues(alpha: 0.1),
@@ -161,7 +161,7 @@ class AboutScreen extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(28),
       child: Image.asset(
         'assets/images/Logo_SunVolt.png',
         fit: BoxFit.contain,
@@ -169,33 +169,20 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildVersionBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        'Versi 1.1.0 Stable Build',
-        style: GoogleFonts.manrope(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: AppColors.onSurfaceVariant,
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildSectionTitle(String title) {
     return Align(
       alignment: Alignment.centerLeft,
-      child: Text(
-        title,
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 18,
-          fontWeight: FontWeight.w800,
-          color: AppColors.onSurface,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 4),
+        child: Text(
+          title,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: AppColors.onSurface,
+          ),
         ),
       ),
     );
@@ -203,10 +190,10 @@ class AboutScreen extends StatelessWidget {
 
   Widget _buildCard({required Widget child}) {
     return Container(
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -234,7 +221,7 @@ class AboutScreen extends StatelessWidget {
         border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: 0.06),
+            color: color.withValues(alpha: 0.05),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -259,7 +246,7 @@ class AboutScreen extends StatelessWidget {
                 Text(
                   title,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w800,
                     color: AppColors.onSurface,
                   ),
@@ -280,8 +267,6 @@ class AboutScreen extends StatelessWidget {
       ),
     );
   }
-
-
 
   Widget _buildInfoCard(List<Widget> entries) {
     return Container(

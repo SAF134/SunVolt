@@ -89,8 +89,21 @@ app.post('/api/midtrans-callback', async (req, res) => {
         const fraudStatus = statusResponse.fraud_status;
         const amount = parseInt(statusResponse.gross_amount);
         const orderId = statusResponse.order_id;
+        const signatureKey = statusResponse.signature_key;
+        const statusCode = statusResponse.status_code;
 
-        console.log(`Notifikasi: Order: ${orderId}, Status: ${transactionStatus}, Amount: ${amount}`);
+        console.log(`Notifikasi Masuk: Order: ${orderId}, Status: ${transactionStatus}, Amount: ${amount}`);
+
+        // --- VERIFIKASI KEASLIAN CALLBACK (SIGNATURE KEY) ---
+        // Formula SHA-512 Midtrans: SHA512(order_id + status_code + gross_amount + ServerKey)
+        const crypto = require('crypto');
+        const payload = orderId + statusCode + statusResponse.gross_amount + process.env.MIDTRANS_SERVER_KEY;
+        const calculatedSignature = crypto.createHash('sha512').update(payload).digest('hex');
+
+        if (signatureKey !== calculatedSignature) {
+            console.warn(`❌ PERINGATAN: Signature Key tidak cocok untuk Order ${orderId}. Potensi manipulasi callback!`);
+            return res.status(403).send('Invalid signature');
+        }
 
         if (transactionStatus == 'capture' || transactionStatus == 'settlement') {
             if (fraudStatus == 'accept' || fraudStatus == undefined) {
@@ -100,6 +113,13 @@ app.post('/api/midtrans-callback', async (req, res) => {
                 
                 if (txDoc.exists) {
                     const txData = txDoc.data();
+                    
+                    // Pastikan transaksi belum sukses sebelumnya (cegah Replay Attack / double top-up)
+                    if (txData.status === 'settlement') {
+                        console.log(`ℹ️ Transaksi ${orderId} sudah diproses sebelumnya.`);
+                        return res.status(200).send('Already processed');
+                    }
+
                     const userId = txData.userId;
                     
                     if (userId) {
@@ -118,7 +138,7 @@ app.post('/api/midtrans-callback', async (req, res) => {
                         const formattedAmount = amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                         await db.collection('users').doc(userId).collection('activity_history').add({
                             title: 'Top-Up Dompet',
-                            subtitle: 'Sanbox Midtrans',
+                            subtitle: 'Sandbox Midtrans',
                             amount: `+Rp ${formattedAmount}`,
                             isPositive: true,
                             timestamp: admin.firestore.FieldValue.serverTimestamp(),

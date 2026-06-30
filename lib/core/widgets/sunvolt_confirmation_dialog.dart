@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_shadows.dart';
+import '../theme/app_animations.dart';
 
 class SunVoltConfirmationDialog extends StatelessWidget {
   final String title;
@@ -25,7 +27,14 @@ class SunVoltConfirmationDialog extends StatelessWidget {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       backgroundColor: Colors.white,
-      child: Padding(
+      elevation: 0,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: AppShadows.dialog,
+        ),
+        child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -119,8 +128,9 @@ class SunVoltConfirmationDialog extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   static void show(
     BuildContext context, {
@@ -131,16 +141,33 @@ class SunVoltConfirmationDialog extends StatelessWidget {
     required VoidCallback onConfirm,
     bool isDestructive = false,
   }) {
-    showDialog(
+    showGeneralDialog(
       context: context,
-      builder: (context) => SunVoltConfirmationDialog(
-        title: title,
-        message: message,
-        confirmLabel: confirmLabel,
-        cancelLabel: cancelLabel,
-        onConfirm: onConfirm,
-        isDestructive: isDestructive,
-      ),
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.black54,
+      transitionDuration: AppDurations.normal,
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          SunVoltConfirmationDialog(
+            title: title,
+            message: message,
+            confirmLabel: confirmLabel,
+            cancelLabel: cancelLabel,
+            onConfirm: onConfirm,
+            isDestructive: isDestructive,
+          ),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: CurvedAnimation(
+            parent: animation,
+            curve: AppCurves.overshoot,
+          ),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
     );
   }
 }

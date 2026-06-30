@@ -59,8 +59,8 @@ class SunVoltTextField extends StatelessWidget {
             filled: true,
             fillColor:
                 enabled
-                    ? AppColors.surfaceContainerHigh
-                    : AppColors.surfaceContainerHigh.withValues(alpha: 0.5),
+                    ? AppColors.surfaceContainerLow
+                    : AppColors.surfaceContainerLow.withValues(alpha: 0.5),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide.none,
@@ -72,7 +72,7 @@ class SunVoltTextField extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
-                color: AppColors.primary.withValues(alpha: 0.2),
+                color: AppColors.yellowAccent.withValues(alpha: 0.5),
                 width: 2,
               ),
             ),
@@ -81,7 +81,7 @@ class SunVoltTextField extends StatelessWidget {
               vertical: 16,
             ),
             hintStyle: GoogleFonts.manrope(
-              color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+              color: AppColors.textTertiary,
             ),
           ),
         ),

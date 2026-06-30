@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_shadows.dart';
 
 class SunVoltTransactionItem extends StatelessWidget {
   final String title;
@@ -30,6 +31,7 @@ class SunVoltTransactionItem extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(16),
+          boxShadow: AppShadows.subtle,
         ),
         child: Row(
           children: [

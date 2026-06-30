@@ -1,46 +1,52 @@
 import 'package:flutter/material.dart';
 
 /// SunVolt Design System Color Tokens
-/// Based on "The Solar Kinetic Aesthetic" design system
+/// 5 Warna Dasar: Kuning (#FFD700), Hijau (#3A7100), Putih, Hitam (#191C1D), Merah (#D32F2F)
 class AppColors {
   AppColors._();
 
   // ── Primary (Sun Yellow - "Action Energy") ──
   static const Color primary = Color(0xFFFFD700);
-  static const Color onPrimary = Color(0xFF191C1D); // onSurface color for contrast
+  static const Color onPrimary = Color(0xFF191C1D);
   static const Color primaryContainer = Color(0xFFFFD700);
-  static const Color onPrimaryContainer = Color(0xFF705E00);
+  static const Color onPrimaryContainer = Color(0xFF544600);
   static const Color primaryFixed = Color(0xFFFFE16D);
   static const Color primaryFixedDim = Color(0xFFE9C400);
   static const Color onPrimaryFixed = Color(0xFF221B00);
   static const Color onPrimaryFixedVariant = Color(0xFF544600);
   static const Color inversePrimary = Color(0xFFE9C400);
 
+  // ── Primary Variants (derived from #FFD700) ──
+  static const Color yellowSoft = Color(0xFFFFF8E1);      // bg lembut kuning
+  static const Color yellowLight = Color(0xFFFFEA70);      // kuning terang
+  static const Color yellowDark = Color(0xFFCCAC00);       // kuning gelap
+  static const Color yellowAccent = Color(0xFFEAB308);     // aksen kuning kuat
+
   // ── Secondary (Nature Green - "Sustainable Flow") ──
-  static const Color secondary = Color(0xFF006D3D);
+  static const Color secondary = Color(0xFF3A7100);
   static const Color onSecondary = Color(0xFFFFFFFF);
-  static const Color secondaryContainer = Color(0xFF97F3B5);
-  static const Color onSecondaryContainer = Color(0xFF047240);
-  static const Color secondaryFixed = Color(0xFF9AF6B8);
-  static const Color secondaryFixedDim = Color(0xFF7ED99E);
-  static const Color onSecondaryFixed = Color(0xFF00210F);
-  static const Color onSecondaryFixedVariant = Color(0xFF00522D);
+  static const Color secondaryContainer = Color(0xFFB6F29C);
+  static const Color onSecondaryContainer = Color(0xFF2D5900);
+  static const Color secondaryFixed = Color(0xFFC2F5AA);
+  static const Color secondaryFixedDim = Color(0xFF8CD676);
+  static const Color onSecondaryFixed = Color(0xFF0F2000);
+  static const Color onSecondaryFixedVariant = Color(0xFF2D5900);
 
-  // ── Tertiary ──
-  static const Color tertiary = Color(0xFF00696F);
-  static const Color onTertiary = Color(0xFFFFFFFF);
-  static const Color tertiaryContainer = Color(0xFF00F1FF);
-  static const Color onTertiaryContainer = Color(0xFF006A70);
-  static const Color tertiaryFixed = Color(0xFF79F5FF);
-  static const Color tertiaryFixedDim = Color(0xFF00DBE8);
-  static const Color onTertiaryFixed = Color(0xFF002022);
-  static const Color onTertiaryFixedVariant = Color(0xFF004F54);
+  // ── Secondary Variants (derived from #3A7100) ──
+  static const Color greenSoft = Color(0xFFF0F9EB);       // bg lembut hijau
+  static const Color greenLight = Color(0xFF6BAF3D);       // hijau terang
+  static const Color greenDark = Color(0xFF245200);        // hijau gelap
 
-  // ── Error ──
-  static const Color error = Color(0xFFBA1A1A);
+  // ── Error (Merah) ──
+  static const Color error = Color(0xFFD32F2F);
   static const Color onError = Color(0xFFFFFFFF);
-  static const Color errorContainer = Color(0xFFFFDAD6);
-  static const Color onErrorContainer = Color(0xFF93000A);
+  static const Color errorContainer = Color(0xFFFFE0E0);
+  static const Color onErrorContainer = Color(0xFF8B0000);
+
+  // ── Error Variants ──
+  static const Color redSoft = Color(0xFFFFF0F0);         // bg lembut merah
+  static const Color redLight = Color(0xFFEF5350);         // merah terang
+  static const Color redDark = Color(0xFFC62828);          // merah gelap
 
   // ── Surface & Background ──
   static const Color surface = Color(0xFFF8F9FA);
@@ -67,10 +73,13 @@ class AppColors {
   static const Color inverseSurface = Color(0xFF2E3132);
   static const Color inverseOnSurface = Color(0xFFF0F1F2);
 
-  // ── Special / Semantic ──
-  static const Color sunYellow = Color(0xFFFFD700);
-  static const Color natureGreen = Color(0xFF006D3D);
-  static const Color yellowAccent400 = Color(0xFFFACC15);
-  static const Color yellowAccent500 = Color(0xFFEAB308);
-  static const Color voltGreen = Color(0xFF22C55E);
+  // ── Text Hierarchy (derived from black #191C1D) ──
+  static const Color textPrimary = Color(0xFF191C1D);
+  static const Color textSecondary = Color(0xFF5A5D5E);
+  static const Color textTertiary = Color(0xFF8A8D8F);
+  static const Color textDisabled = Color(0xFFBDBFC0);
+
+  // ── Semantic Aliases ──
+  static const Color sunYellow = primary;
+  static const Color natureGreen = secondary;
 }

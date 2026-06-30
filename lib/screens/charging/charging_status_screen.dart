@@ -17,7 +17,7 @@ class ChargingStatusScreen extends StatefulWidget {
 }
 
 class _ChargingStatusScreenState extends State<ChargingStatusScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _pulseController;
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance; // Utama (Milik Anda)
@@ -40,6 +40,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
   late String _vehicleType;
   late double _fixedVoltage; // 54.6V untuk sepeda (DC), 220V untuk motor (AC)
   DateTime? _sessionStartTime;
+  DateTime? _lastTickTime;
 
   // ─── Status Pengisian ───
   bool _isCharging = true;
@@ -66,6 +67,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Menghubungkan ke database Firebase proyek sekunder teman Anda
     _secondaryFirestore = FirebaseFirestore.instanceFor(app: Firebase.app('secondary'));
     
@@ -145,6 +147,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
     }
     
     _sessionStartTime = startTime;
+    _lastTickTime = startTime;
 
     // Mulai mendengarkan data arus dari ESP32 melalui Firebase Kedua
     _startListeningToSensor();
@@ -218,7 +221,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Koneksi terhubung kembali. Pengisian daya dilanjutkan.'),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.secondary,
             ),
           );
         }
@@ -396,14 +399,23 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
     }
 
     setState(() {
+      final now = DateTime.now();
       if (_sessionStartTime != null) {
-        _elapsedSeconds = DateTime.now().difference(_sessionStartTime!).inSeconds;
+        _elapsedSeconds = now.difference(_sessionStartTime!).inSeconds;
       } else {
         _elapsedSeconds++;
       }
 
-      // Akumulasi energi: Daya (W) × waktu (1 detik) = Watt-second → konversi ke Wh
-      _energyConsumedWh += _currentPower / 3600.0;
+      // Akumulasi energi dengan menghitung selisih waktu dinamis (deltaTime)
+      if (_lastTickTime != null) {
+        final double deltaTime = now.difference(_lastTickTime!).inMilliseconds / 1000.0;
+        if (deltaTime > 0) {
+          _energyConsumedWh += _currentPower * (deltaTime / 3600.0);
+        }
+      } else {
+        _energyConsumedWh += _currentPower / 3600.0;
+      }
+      _lastTickTime = now;
 
       // Tarif berjalan (Rp) = Energi (kWh) × Tarif per kWh
       _currentTariff = (_energyConsumedWh / 1000.0) * _tariffPerKWh;
@@ -584,7 +596,48 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _syncBackgroundProgress();
+    }
+  }
+
+  void _syncBackgroundProgress() {
+    if (!_isCharging || _isComplete || _isInterrupted || _sessionStartTime == null) return;
+
+    setState(() {
+      final now = DateTime.now();
+      _elapsedSeconds = now.difference(_sessionStartTime!).inSeconds;
+
+      if (_lastTickTime != null) {
+        final double deltaTime = now.difference(_lastTickTime!).inMilliseconds / 1000.0;
+        if (deltaTime > 0) {
+          _energyConsumedWh += _currentPower * (deltaTime / 3600.0);
+        }
+      }
+      _lastTickTime = now;
+
+      _currentTariff = (_energyConsumedWh / 1000.0) * _tariffPerKWh;
+
+      if (_currentTariff.round() >= _userBalance && _userBalance > 0) {
+        _currentTariff = _userBalance.toDouble();
+        _isComplete = true;
+        _isCharging = false;
+        _stoppedByBalance = true;
+        _currentPower = 0.0;
+        _pulseController.stop();
+        _chargingTimer?.cancel();
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _recordAndFinalize();
+        });
+      }
+    });
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _chargingTimer?.cancel();
     _sensorSubscription?.cancel();
     _interruptionTimer?.cancel();
@@ -967,39 +1020,32 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
             child: SizedBox(
               width: double.infinity,
               height: 60,
-              child: ElevatedButton.icon(
-                onPressed: _isComplete
-                    ? _onCompletePressed
-                    : _onStopPressed,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _isComplete
-                      ? AppColors.secondary
-                      : AppColors.error,
-                  foregroundColor: Colors.white,
-                  elevation: 4,
-                  shadowColor: (_isComplete
-                          ? AppColors.secondary
-                          : AppColors.error)
-                      .withValues(alpha: 0.2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                icon: Icon(
-                  _isComplete
-                      ? Icons.home_rounded
-                      : Icons.stop_circle,
-                ),
-                label: Text(
-                  _isComplete
-                      ? 'Kembali ke Beranda'
-                      : 'Berhenti Mengisi',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
+              child: _isComplete
+                  ? ElevatedButton.icon(
+                      onPressed: _onCompletePressed,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.secondary,
+                        foregroundColor: Colors.white,
+                        elevation: 4,
+                        shadowColor: AppColors.secondary.withValues(alpha: 0.2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      icon: const Icon(Icons.home_rounded),
+                      label: Text(
+                        'Kembali ke Beranda',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    )
+                  : SwipeToConfirmButton(
+                      onConfirm: _onStopPressed,
+                      text: 'Geser untuk Berhenti',
+                      activeColor: AppColors.error,
+                    ),
             ),
           ),
         ),
@@ -1037,6 +1083,159 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
   }
 
 
+}
+
+class SwipeToConfirmButton extends StatefulWidget {
+  final VoidCallback onConfirm;
+  final String text;
+  final Color backgroundColor;
+  final Color activeColor;
+
+  const SwipeToConfirmButton({
+    super.key,
+    required this.onConfirm,
+    required this.text,
+    this.backgroundColor = AppColors.surfaceContainerLow,
+    this.activeColor = AppColors.error,
+  });
+
+  @override
+  State<SwipeToConfirmButton> createState() => _SwipeToConfirmButtonState();
+}
+
+class _SwipeToConfirmButtonState extends State<SwipeToConfirmButton>
+    with SingleTickerProviderStateMixin {
+  double _dragValue = 0.0;
+  late AnimationController _animController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double maxDragDistance = constraints.maxWidth - 56.0 - 8.0;
+
+        return Container(
+          width: double.infinity,
+          height: 60,
+          decoration: BoxDecoration(
+            color: widget.backgroundColor,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: AppColors.outlineVariant.withValues(alpha: 0.15),
+              width: 1,
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Stack(
+            alignment: Alignment.centerLeft,
+            children: [
+              Container(
+                width: 56 + _dragValue * maxDragDistance,
+                height: 52,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      widget.activeColor.withValues(alpha: 0.8),
+                      widget.activeColor,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(26),
+                ),
+              ),
+              Center(
+                child: Opacity(
+                  opacity: (1 - _dragValue).clamp(0.0, 1.0),
+                  child: Text(
+                    widget.text,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: _dragValue * maxDragDistance,
+                child: GestureDetector(
+                  onHorizontalDragUpdate: (details) {
+                    setState(() {
+                      _dragValue += details.primaryDelta! / maxDragDistance;
+                      _dragValue = _dragValue.clamp(0.0, 1.0);
+                    });
+                  },
+                  onHorizontalDragEnd: (details) {
+                    if (_dragValue > 0.85) {
+                      setState(() {
+                        _dragValue = 1.0;
+                      });
+                      widget.onConfirm();
+                    } else {
+                      final Animation<double> animation = Tween<double>(
+                        begin: _dragValue,
+                        end: 0.0,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: _animController,
+                          curve: Curves.easeOutCubic,
+                        ),
+                      );
+
+                      animation.addListener(() {
+                        setState(() {
+                          _dragValue = animation.value;
+                        });
+                      });
+
+                      _animController.reset();
+                      _animController.forward();
+                    }
+                  },
+                  child: Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.chevron_right_rounded,
+                        color: widget.activeColor,
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 

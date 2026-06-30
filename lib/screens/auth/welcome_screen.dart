@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/widgets/dynamic_aurora_background.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -27,7 +28,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Login Google gagal: $e'),
-            backgroundColor: Colors.redAccent,
+            backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -43,35 +44,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surfaceContainerLowest,
-      body: Stack(
-        children: [
-          // Background Glow Blurs
-          Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFD700).withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 50,
-            left: -150,
-            child: Container(
-              width: 350,
-              height: 350,
-              decoration: BoxDecoration(
-                color: AppColors.secondary.withValues(alpha: 0.06),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-
-          SafeArea(
+      body: DynamicAuroraBackground(
+        child: SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
                 return SingleChildScrollView(
@@ -98,7 +72,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                   ),
                                   child: Text(
                                     'REVOLUSI ENERGI BERSIH',
-                                    style: GoogleFonts.spaceGrotesk(
+                                    style: GoogleFonts.plusJakartaSans(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w700,
                                       letterSpacing: 1.5,
@@ -269,13 +243,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                 borderRadius: BorderRadius.circular(20),
                                 gradient: const LinearGradient(
                                   colors: [
-                                    Color(0xFFFFF176),
-                                    Color(0xFFF5C400),
+                                    AppColors.yellowLight,
+                                    AppColors.primaryFixedDim,
                                   ],
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+                                    color: AppColors.primary.withValues(alpha: 0.3),
                                     blurRadius: 20,
                                     offset: const Offset(0, 6),
                                   ),
@@ -287,8 +261,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                   borderRadius: BorderRadius.circular(18.5),
                                   gradient: const LinearGradient(
                                     colors: [
-                                      Color(0xFFFFD700),
-                                      Color(0xFFE5B200),
+                                      AppColors.primary,
+                                      AppColors.yellowDark,
                                     ],
                                   ),
                                 ),
@@ -304,7 +278,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                               height: 24,
                                               child: CircularProgressIndicator(
                                                 strokeWidth: 2,
-                                                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF221B00)),
+                                                valueColor: AlwaysStoppedAnimation<Color>(AppColors.onPrimaryFixed),
                                               ),
                                             )
                                           : Row(
@@ -329,7 +303,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                                   style: GoogleFonts.plusJakartaSans(
                                                     fontWeight: FontWeight.w800,
                                                     fontSize: 16,
-                                                    color: const Color(0xFF221B00),
+                                                    color: AppColors.onPrimaryFixed,
                                                   ),
                                                 ),
                                               ],
@@ -375,8 +349,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           },
         ),
       ),
-    ],
-  ),
-);
+    ),
+  );
 }
 }

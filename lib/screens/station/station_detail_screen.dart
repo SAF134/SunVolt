@@ -171,10 +171,10 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFFD700).withValues(alpha: 0.12),
+                              color: AppColors.primary.withValues(alpha: 0.12),
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+                                color: AppColors.primary.withValues(alpha: 0.3),
                                 width: 1,
                               ),
                             ),
@@ -191,7 +191,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                               children: [
                                 Text(
                                   'TARIF PENGISIAN LISTRIK',
-                                  style: GoogleFonts.spaceGrotesk(
+                                  style: GoogleFonts.plusJakartaSans(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 1.5,
@@ -205,7 +205,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                                   children: [
                                     Text(
                                       'Rp 2.500',
-                                      style: GoogleFonts.spaceGrotesk(
+                                      style: GoogleFonts.plusJakartaSans(
                                         fontSize: 22,
                                         fontWeight: FontWeight.w700,
                                         color: AppColors.onSurface,
@@ -234,7 +234,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Text(
-                      'Pilih Kendaraan',
+                      'Pilih Kendaraan Anda',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -443,7 +443,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                   foregroundColor: AppColors.onPrimaryContainer,
                   elevation: 4,
                   shadowColor:
-                      const Color(0xFFEAB308).withValues(alpha: 0.2),
+                      AppColors.yellowAccent.withValues(alpha: 0.2),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -515,19 +515,19 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: isSelected 
-              ? const Color(0xFFFFD700).withValues(alpha: 0.04) 
+              ? AppColors.primary.withValues(alpha: 0.04) 
               : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFFFFD700)
+                ? AppColors.primary
                 : Colors.black.withValues(alpha: 0.05),
             width: isSelected ? 1.5 : 1.0,
           ),
           boxShadow: [
             BoxShadow(
               color: isSelected
-                  ? const Color(0xFFFFD700).withValues(alpha: 0.08)
+                  ? AppColors.primary.withValues(alpha: 0.08)
                   : Colors.black.withValues(alpha: 0.02),
               blurRadius: 16,
               offset: const Offset(0, 4),
@@ -543,7 +543,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
               height: 56,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? const Color(0xFFFFD700)
+                    ? AppColors.primary
                     : AppColors.surfaceContainerLow,
                 shape: BoxShape.circle,
               ),
@@ -551,7 +551,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                 icon,
                 size: 24,
                 color: isSelected
-                    ? const Color(0xFF221B00)
+                    ? AppColors.onPrimaryFixed
                     : AppColors.onSurfaceVariant,
               ),
             ),
@@ -628,7 +628,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected
-                      ? const Color(0xFFFFD700)
+                      ? AppColors.primary
                       : AppColors.outlineVariant,
                   width: 2,
                 ),
@@ -639,7 +639,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                         width: 10,
                         height: 10,
                         decoration: const BoxDecoration(
-                          color: Color(0xFFFFD700),
+                          color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
                       ),

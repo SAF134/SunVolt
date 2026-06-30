@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 /// SunVolt Typography System
-/// Headline: Plus Jakarta Sans (bold, editorial)
+/// Headline/Angka: Plus Jakarta Sans (bold, editorial)
 /// Body/Label: Manrope (precise, readable)
 class AppTextStyles {
   AppTextStyles._();
@@ -110,6 +110,28 @@ class AppTextStyles {
     fontSize: 11,
     fontWeight: FontWeight.w600,
     letterSpacing: 0.5,
+    color: AppColors.onSurface,
+  );
+
+  // ── Numeric (Plus Jakarta Sans — replaces SpaceGrotesk) ──
+  static TextStyle numericLarge = GoogleFonts.plusJakartaSans(
+    fontSize: 28,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -0.5,
+    color: AppColors.onSurface,
+  );
+
+  static TextStyle numericMedium = GoogleFonts.plusJakartaSans(
+    fontSize: 20,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -0.3,
+    color: AppColors.onSurface,
+  );
+
+  static TextStyle numericSmall = GoogleFonts.plusJakartaSans(
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+    letterSpacing: -0.2,
     color: AppColors.onSurface,
   );
 }

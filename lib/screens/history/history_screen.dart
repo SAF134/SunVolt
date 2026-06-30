@@ -162,7 +162,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Gagal menghapus riwayat: $e'),
-            backgroundColor: Colors.redAccent,
+            backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -296,7 +296,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             : Icons.pedal_bike),
                     title: data['title'] ?? 'Transaksi',
                     station: data['subtitle'] ??
-                        (isTopUp ? 'Setoran Sanbox Midtrans' : 'Stasiun SunVolt'),
+                        (isTopUp ? 'Setoran Sandbox Midtrans' : 'Stasiun SunVolt'),
                     time: _formatRelativeTime(data['timestamp'] as Timestamp?),
                     energy: energyText,
                     cost: data['amount'] ?? 'Rp 0',

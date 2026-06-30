@@ -120,25 +120,30 @@ class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
 
         return Stack(
           children: List.generate(widget.children.length, (index) {
-            if (index == _currentIndex) {
-              final Offset slideInOffset = isMovingRight
+            final bool isCurrent = index == _currentIndex;
+            final bool isOld = index == _oldIndex;
+            final bool isTransitioning = isOld && !_controller.isCompleted;
+
+            Offset translation = Offset.zero;
+            if (isCurrent) {
+              translation = isMovingRight
                   ? Offset(1.0 - value, 0.0)
                   : Offset(-1.0 + value, 0.0);
-              return FractionalTranslation(
-                translation: slideInOffset,
-                child: widget.children[index],
-              );
-            } else if (index == _oldIndex && !_controller.isCompleted) {
-              final Offset slideOutOffset = isMovingRight
+            } else if (isTransitioning) {
+              translation = isMovingRight
                   ? Offset(0.0 - value, 0.0)
                   : Offset(0.0 + value, 0.0);
-              return FractionalTranslation(
-                translation: slideOutOffset,
-                child: widget.children[index],
-              );
-            } else {
-              return const SizedBox.shrink();
             }
+
+            final bool isOffstage = !isCurrent && !isTransitioning;
+
+            return Offstage(
+              offstage: isOffstage,
+              child: FractionalTranslation(
+                translation: translation,
+                child: widget.children[index],
+              ),
+            );
           }),
         );
       },

@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_shadows.dart';
 
 class SunVoltBottomNav extends StatelessWidget {
   final int currentIndex;
@@ -13,7 +15,7 @@ class SunVoltBottomNav extends StatelessWidget {
   });
 
   static const _items = [
-        _NavItem(icon: Icons.ev_station, label: 'Beranda'),
+    _NavItem(icon: Icons.ev_station, label: 'Beranda'),
     _NavItem(icon: Icons.account_balance_wallet, label: 'Dompet'),
     _NavItem(icon: Icons.history, label: 'Riwayat'),
     _NavItem(icon: Icons.person, label: 'Profil'),
@@ -27,13 +29,7 @@ class SunVoltBottomNav extends StatelessWidget {
           topLeft: Radius.circular(48),
           topRight: Radius.circular(48),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 40,
-            offset: const Offset(0, -10),
-          ),
-        ],
+        boxShadow: AppShadows.navigation,
       ),
       child: ClipRRect(
         borderRadius: const BorderRadius.only(
@@ -68,16 +64,10 @@ class SunVoltBottomNav extends StatelessWidget {
                     decoration: BoxDecoration(
                       color:
                           isActive
-                              ? const Color(0xFFFFD700)
+                              ? AppColors.primary
                               : Colors.transparent,
                       borderRadius: BorderRadius.circular(999),
-                      boxShadow: isActive ? [
-                        BoxShadow(
-                          color: const Color(0xFFFFD700).withValues(alpha: 0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        )
-                      ] : null,
+                      boxShadow: isActive ? AppShadows.glowYellow : null,
                     ),
                     child: AnimatedScale(
                       scale: isActive ? 1.05 : 1.0,
@@ -95,8 +85,8 @@ class SunVoltBottomNav extends StatelessWidget {
                               size: 24,
                               color:
                                   isActive
-                                      ? const Color(0xFF18181B)
-                                      : const Color(0xFF71717A),
+                                      ? AppColors.textPrimary
+                                      : AppColors.textTertiary,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -107,8 +97,8 @@ class SunVoltBottomNav extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                               color:
                                   isActive
-                                      ? const Color(0xFF18181B)
-                                      : const Color(0xFF71717A),
+                                      ? AppColors.textPrimary
+                                      : AppColors.textTertiary,
                             ),
                           ),
                         ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_shadows.dart';
 
 class SunVoltHistoryCard extends StatelessWidget {
   final IconData icon;
@@ -50,13 +51,7 @@ class SunVoltHistoryCard extends StatelessWidget {
               AppColors.outlineVariant.withValues(alpha: 0.08),
             ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: AppShadows.card,
         ),
         padding: const EdgeInsets.all(1.5),
         child: Container(
