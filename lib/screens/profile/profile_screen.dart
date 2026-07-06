@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_confirmation_dialog.dart';
 import '../../core/widgets/sunvolt_app_bar.dart';
+import '../../core/widgets/sunvolt_shimmer.dart';
 import '../../core/services/auth_service.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -28,113 +30,138 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const SizedBox(height: 32),
-                  // Avatar - show Google profile photo if available
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.primaryContainer,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryContainer.withValues(alpha: 0.3),
-                          blurRadius: 20,
-                        ),
-                      ],
-                    ),
-                    child: ClipOval(
-                      child: photoUrl != null
-                          ? Image.network(
-                              photoUrl,
-                              fit: BoxFit.cover,
-                              width: 100,
-                              height: 100,
-                              frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                                if (wasSynchronouslyLoaded) return child;
-                                return AnimatedOpacity(
-                                  opacity: frame == null ? 0 : 1,
-                                  duration: const Duration(milliseconds: 500),
-                                  curve: Curves.easeOut,
-                                  child: child,
-                                );
-                              },
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes != null
-                                        ? loadingProgress.cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
-                                        : null,
-                                    strokeWidth: 2,
-                                    color: AppColors.onPrimaryContainer.withValues(alpha: 0.3),
-                                  ),
-                                );
-                              },
-                              errorBuilder: (_, e, s) => const Icon(
-                                Icons.person,
-                                size: 48,
-                                color: AppColors.onPrimaryContainer,
-                              ),
-                            )
-                          : const Icon(
-                              Icons.person,
-                              size: 48,
-                              color: AppColors.onPrimaryContainer,
+                  StreamBuilder<DocumentSnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user?.uid)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const SunVoltProfileSkeleton();
+                      }
+
+                      String currentName = displayName;
+                      String currentEmail = email;
+
+                      if (snapshot.hasData && snapshot.data!.exists) {
+                        final data = snapshot.data!.data() as Map<String, dynamic>;
+                        currentName = data['name'] ?? displayName;
+                        currentEmail = data['email'] ?? email;
+                      }
+
+                      return Column(
+                        children: [
+                          // Avatar - show Google profile photo if available
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.primaryContainer,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primaryContainer.withValues(alpha: 0.3),
+                                  blurRadius: 20,
+                                ),
+                              ],
                             ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Name from Google account
-                  Text(
-                    displayName,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 24, fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  // Email from Google account
-                  Text(
-                    email,
-                    style: GoogleFonts.manrope(
-                      fontSize: 14, color: AppColors.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Role Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: (email == 'firecalm2@gmail.com' || 
-                              email == 'syauqiakmal137@gmail.com' || 
-                              email == 'fattaha.rasyad@gmail.com')
-                          ? AppColors.secondary.withValues(alpha: 0.1)
-                          : AppColors.primaryContainer.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: (email == 'firecalm2@gmail.com' || 
-                                email == 'syauqiakmal137@gmail.com' || 
-                                email == 'fattaha.rasyad@gmail.com')
-                            ? AppColors.secondary.withValues(alpha: 0.2)
-                            : AppColors.primaryContainer.withValues(alpha: 0.2),
-                      ),
-                    ),
-                    child: Text(
-                      (email == 'firecalm2@gmail.com' || 
-                       email == 'syauqiakmal137@gmail.com' || 
-                       email == 'fattaha.rasyad@gmail.com')
-                          ? 'Pengembang'
-                          : 'Pembeli',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: (email == 'firecalm2@gmail.com' || 
-                                email == 'syauqiakmal137@gmail.com' || 
-                                email == 'fattaha.rasyad@gmail.com')
-                            ? AppColors.secondary
-                            : AppColors.onPrimaryContainer,
-                      ),
-                    ),
+                            child: ClipOval(
+                              child: photoUrl != null
+                                  ? Image.network(
+                                      photoUrl,
+                                      fit: BoxFit.cover,
+                                      width: 100,
+                                      height: 100,
+                                      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                                        if (wasSynchronouslyLoaded) return child;
+                                        return AnimatedOpacity(
+                                          opacity: frame == null ? 0 : 1,
+                                          duration: const Duration(milliseconds: 500),
+                                          curve: Curves.easeOut,
+                                          child: child,
+                                        );
+                                      },
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress.expectedTotalBytes != null
+                                                ? loadingProgress.cumulativeBytesLoaded /
+                                                    loadingProgress.expectedTotalBytes!
+                                                : null,
+                                            strokeWidth: 2,
+                                            color: AppColors.onPrimaryContainer.withValues(alpha: 0.3),
+                                          ),
+                                        );
+                                      },
+                                      errorBuilder: (_, e, s) => const Icon(
+                                        Icons.person,
+                                        size: 48,
+                                        color: AppColors.onPrimaryContainer,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.person,
+                                      size: 48,
+                                      color: AppColors.onPrimaryContainer,
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Name from Firestore / Google account
+                          Text(
+                            currentName,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 24, fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          // Email from Firestore / Google account
+                          Text(
+                            currentEmail,
+                            style: GoogleFonts.manrope(
+                              fontSize: 14, color: AppColors.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          // Role Badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: (currentEmail == 'firecalm2@gmail.com' || 
+                                      currentEmail == 'syauqiakmal137@gmail.com' || 
+                                      currentEmail == 'fattaha.rasyad@gmail.com')
+                                  ? AppColors.secondary.withValues(alpha: 0.1)
+                                  : AppColors.primaryContainer.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: (currentEmail == 'firecalm2@gmail.com' || 
+                                        currentEmail == 'syauqiakmal137@gmail.com' || 
+                                        currentEmail == 'fattaha.rasyad@gmail.com')
+                                    ? AppColors.secondary.withValues(alpha: 0.2)
+                                    : AppColors.primaryContainer.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            child: Text(
+                              (currentEmail == 'firecalm2@gmail.com' || 
+                               currentEmail == 'syauqiakmal137@gmail.com' || 
+                               currentEmail == 'fattaha.rasyad@gmail.com')
+                                  ? 'Pengembang'
+                                  : 'Pembeli',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: (currentEmail == 'firecalm2@gmail.com' || 
+                                        currentEmail == 'syauqiakmal137@gmail.com' || 
+                                        currentEmail == 'fattaha.rasyad@gmail.com')
+                                    ? AppColors.secondary
+                                    : AppColors.onPrimaryContainer,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(height: 24),
                   // Menu

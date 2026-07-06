@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/sunvolt_app_bar.dart';
+import '../../core/widgets/sunvolt_shimmer.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,6 +31,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
   Timer? _chargingTimer;
   StreamSubscription? _sensorSubscription;
   bool _initialized = false;
+  bool _loadingData = true;
   bool _hasRecorded = false;
   bool _stoppedByBalance = false;
   int _userBalance = 0;
@@ -157,6 +159,12 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
       const Duration(seconds: 1),
       _onChargingTick,
     );
+
+    if (mounted) {
+      setState(() {
+        _loadingData = false;
+      });
+    }
   }
 
   /// Mendengarkan data arus dari ESP32 secara real-time melalui Firebase
@@ -659,11 +667,13 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
             trailing: SaldoBadge(showLabel: false),
           ),
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
+            child: _loadingData
+                ? const SunVoltChargingStatusSkeleton()
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 40),
 
                   // ── Status Badge ──
                   Container(
