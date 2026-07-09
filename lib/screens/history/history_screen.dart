@@ -186,6 +186,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return DateFormat('dd MMM yyyy').format(date);
   }
 
+  String _formatTimeText(Map<String, dynamic> data) {
+    final timestamp = data['timestamp'] as Timestamp?;
+    if (timestamp == null) return 'Baru saja';
+    final relative = _formatRelativeTime(timestamp);
+    final finishedTime = data['waktu_selesai'] ?? 
+        '${DateFormat('HH:mm').format(timestamp.toDate().toLocal())} WIB';
+    return '$relative ($finishedTime)';
+  }
+
+  String _formatDuration(int totalSeconds) {
+    if (totalSeconds <= 0) return '00:00';
+    final int hours = totalSeconds ~/ 3600;
+    final int minutes = (totalSeconds % 3600) ~/ 60;
+    final int seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    } else {
+      return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -297,10 +319,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     title: data['title'] ?? 'Transaksi',
                     station: data['subtitle'] ??
                         (isTopUp ? 'Setoran Sandbox Midtrans' : 'Stasiun SunVolt'),
-                    time: _formatRelativeTime(data['timestamp'] as Timestamp?),
+                    time: _formatTimeText(data),
                     energy: energyText,
                     cost: data['amount'] ?? 'Rp 0',
-                    status: 'Selesai',
+                    status: isTopUp
+                        ? 'Sukses'
+                        : _formatDuration((data['duration_seconds'] as num?)?.toInt() ?? 0),
                     isPositive: isTopUp,
                     onDelete: () {
                       showDialog(

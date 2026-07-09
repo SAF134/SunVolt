@@ -581,6 +581,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
         'type': 'charging',
         'energy': '${energyKWh.toStringAsFixed(2)} kWh',
         'duration_seconds': _elapsedSeconds,
+        'waktu_selesai': '${DateFormat('HH:mm').format(DateTime.now())} WIB',
       });
 
       // Reset status station & matikan relay di Firebase Kedua teman Anda
