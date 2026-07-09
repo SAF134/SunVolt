@@ -170,29 +170,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  String _formatRelativeTime(Timestamp? timestamp) {
-    if (timestamp == null) return 'Baru saja';
-    final now = DateTime.now();
-    final date = timestamp.toDate();
-    final diff = now.difference(date);
 
-    if (diff.inMinutes < 1) return 'Baru saja';
-    if (diff.inMinutes < 60) return '${diff.inMinutes} menit yang lalu';
-    if (diff.inHours < 24) return '${diff.inHours} jam yang lalu';
-    if (diff.inDays < 7) {
-      if (diff.inDays == 1) return 'Kemarin';
-      return '${diff.inDays} hari yang lalu';
-    }
-    return DateFormat('dd MMM yyyy').format(date);
-  }
 
   String _formatTimeText(Map<String, dynamic> data) {
     final timestamp = data['timestamp'] as Timestamp?;
     if (timestamp == null) return 'Baru saja';
-    final relative = _formatRelativeTime(timestamp);
-    final finishedTime = data['waktu_selesai'] ?? 
-        '${DateFormat('HH:mm').format(timestamp.toDate().toLocal())} WIB';
-    return '$relative ($finishedTime)';
+    final localDateTime = timestamp.toDate().toLocal();
+    return DateFormat('HH:mm d MMM yyyy', 'id_ID').format(localDateTime);
   }
 
   String _formatDuration(int totalSeconds) {
