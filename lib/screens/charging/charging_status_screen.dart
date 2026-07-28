@@ -48,6 +48,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
   bool _isCharging = true;
   bool _isComplete = false;
   int _elapsedSeconds = 0;
+  bool _adminOverrideActive = false;
   
   // ─── Manajemen Interupsi Relay ───
   bool _isInterrupted = false;
@@ -234,7 +235,13 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
           );
         }
 
+        // Membaca status OVRIDE (manual override admin)
+        final bool isManual = _vehicleType == 'motor'
+            ? (data['admin_ac_manual'] as bool? ?? false)
+            : (data['admin_dc_manual'] as bool? ?? false);
+
         setState(() {
+          _adminOverrideActive = isManual;
           // Membaca acCurrent untuk motor, dcCurrent untuk sepeda dari Firebase Kedua
           if (_vehicleType == 'motor') {
             _currentAmps = (data['acCurrent'] as num?)?.toDouble() ?? 0.0;
@@ -714,7 +721,52 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 10),
+
+                  // ── Badge Status OVRIDE Admin ──
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _adminOverrideActive
+                          ? Colors.deepOrange.withValues(alpha: 0.12)
+                          : AppColors.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: _adminOverrideActive
+                            ? Colors.deepOrange.withValues(alpha: 0.3)
+                            : AppColors.outlineVariant.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _adminOverrideActive
+                              ? Icons.admin_panel_settings_rounded
+                              : Icons.admin_panel_settings_outlined,
+                          size: 15,
+                          color: _adminOverrideActive
+                              ? Colors.deepOrange
+                              : AppColors.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'OVRIDE Admin: ${_adminOverrideActive ? 'AKTIF' : 'TIDAK AKTIF'}',
+                          style: GoogleFonts.manrope(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                            color: _adminOverrideActive
+                                ? Colors.deepOrange
+                                : AppColors.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
 
                   // ── Energy Orb ──
                   SizedBox(

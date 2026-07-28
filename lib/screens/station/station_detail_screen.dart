@@ -27,6 +27,8 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
   String _relayDCState = 'OFF';
   String _relayACState = 'OFF';
   String _vehicleType = '';
+  bool _adminAcUnlocked = false;
+  bool _adminDcUnlocked = false;
 
   @override
   void initState() {
@@ -45,6 +47,8 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
             _relayDCState = data['relayDCState'] as String? ?? 'OFF';
             _relayACState = data['relayACState'] as String? ?? 'OFF';
             _vehicleType = data['vehicle_type'] as String? ?? '';
+            _adminAcUnlocked = data['admin_ac_unlocked'] as bool? ?? false;
+            _adminDcUnlocked = data['admin_dc_unlocked'] as bool? ?? false;
           });
         }
       }
@@ -250,14 +254,12 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                           index: 0,
                           icon: Icons.pedal_bike,
                           title: 'Sepeda Listrik',
-                          subtitle: 'Output Maksimal: 48V',
                         ),
                         const SizedBox(height: 12),
                         _vehicleOption(
                           index: 1,
                           icon: Icons.moped,
                           title: 'Motor Listrik',
-                          subtitle: 'Output Maksimal: 72V',
                         ),
                       ],
                     ),
@@ -286,33 +288,10 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                   final user = FirebaseAuth.instance.currentUser;
                   if (user == null) return;
 
-                  // Cek apakah relay aktif dan slot sedang dipakai
+                  // Cek ketersediaan slot Sepeda Listrik (DC Relay)
                   if (_selectedVehicle == 0) {
-                    if (_relayDCState != 'ON') {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            children: [
-                              const Icon(Icons.warning_amber_rounded, color: Colors.white),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  'Relay DC tidak aktif. Pengisian daya tidak dapat dimulai.',
-                                  style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                            ],
-                          ),
-                          backgroundColor: Colors.redAccent,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          margin: const EdgeInsets.all(24),
-                        ),
-                      );
-                      return;
-                    }
-                    if (_vehicleType == 'bike') {
+                    bool isBikeInUse = _relayDCState == 'ON' || _vehicleType == 'bike';
+                    if (isBikeInUse) {
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -322,13 +301,37 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  'Slot sepeda listrik sedang terpakai oleh pengguna lain.',
+                                  'Slot Sepeda Listrik sedang Terpakai oleh pengguna lain.',
                                   style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
                                 ),
                               ),
                             ],
                           ),
-                          backgroundColor: Colors.redAccent,
+                          backgroundColor: AppColors.error,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          margin: const EdgeInsets.all(24),
+                        ),
+                      );
+                      return;
+                    }
+                    if (!_adminDcUnlocked) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.lock_outline_rounded, color: Colors.white),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Sepeda Listrik Tidak Tersedia (Relay terkunci oleh Admin).',
+                                  style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Colors.grey.shade800,
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           margin: const EdgeInsets.all(24),
@@ -338,32 +341,10 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                     }
                   }
 
+                  // Cek ketersediaan slot Motor Listrik (AC Relay)
                   if (_selectedVehicle == 1) {
-                    if (_relayACState != 'ON') {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            children: [
-                              const Icon(Icons.warning_amber_rounded, color: Colors.white),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  'Relay AC tidak aktif. Pengisian daya tidak dapat dimulai.',
-                                  style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                            ],
-                          ),
-                          backgroundColor: Colors.redAccent,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          margin: const EdgeInsets.all(24),
-                        ),
-                      );
-                      return;
-                    }
-                    if (_vehicleType == 'motor') {
+                    bool isMotorInUse = _relayACState == 'ON' || _vehicleType == 'motor';
+                    if (isMotorInUse) {
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -373,13 +354,37 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  'Slot motor listrik sedang terpakai oleh pengguna lain.',
+                                  'Slot Motor Listrik sedang Terpakai oleh pengguna lain.',
                                   style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
                                 ),
                               ),
                             ],
                           ),
-                          backgroundColor: Colors.redAccent,
+                          backgroundColor: AppColors.error,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          margin: const EdgeInsets.all(24),
+                        ),
+                      );
+                      return;
+                    }
+                    if (!_adminAcUnlocked) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.lock_outline_rounded, color: Colors.white),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Motor Listrik Tidak Tersedia (Relay terkunci oleh Admin).',
+                                  style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Colors.grey.shade800,
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           margin: const EdgeInsets.all(24),
@@ -388,7 +393,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                       return;
                     }
                   }
- 
+
                   // Ambil saldo terbaru dari Firestore
                   final userDoc = await FirebaseFirestore.instance
                       .collection('users')
@@ -397,7 +402,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                   final int currentBalance = userDoc.data()?['balance'] ?? 0;
                   final int minBalance = _selectedMinBalance;
                   final String vehicleName = _selectedVehicleName;
- 
+
                   if (currentBalance < minBalance) {
                     if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -425,7 +430,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                       );
                     return;
                   }
- 
+
                   if (!context.mounted) return;
                   SunVoltConfirmationDialog.show(
                     context,
@@ -470,37 +475,39 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
     required int index,
     required IconData icon,
     required String title,
-    required String subtitle,
   }) {
     final isSelected = _selectedVehicle == index;
 
-    // Tentukan status slot secara real-time
+    // Tentukan status slot secara real-time (Terpakai, Tidak Tersedia, Tersedia)
     String statusText;
     Color statusColor;
     Color statusBgColor;
-    if (index == 0) {
-      if (_relayDCState != 'ON') {
-        statusText = 'Relay Tidak Aktif';
-        statusColor = Colors.grey;
-        statusBgColor = Colors.grey.withValues(alpha: 0.08);
-      } else if (_vehicleType == 'bike') {
-        statusText = 'Sedang Dipakai';
+
+    if (index == 0) { // Sepeda Listrik (DC Relay)
+      bool isBikeInUse = _relayDCState == 'ON' || _vehicleType == 'bike';
+      if (isBikeInUse) {
+        statusText = 'Terpakai';
         statusColor = AppColors.error;
         statusBgColor = AppColors.error.withValues(alpha: 0.08);
+      } else if (!_adminDcUnlocked) {
+        statusText = 'Tidak Tersedia';
+        statusColor = Colors.grey;
+        statusBgColor = Colors.grey.withValues(alpha: 0.08);
       } else {
         statusText = 'Tersedia';
         statusColor = AppColors.natureGreen;
         statusBgColor = AppColors.natureGreen.withValues(alpha: 0.08);
       }
-    } else {
-      if (_relayACState != 'ON') {
-        statusText = 'Relay Tidak Aktif';
-        statusColor = Colors.grey;
-        statusBgColor = Colors.grey.withValues(alpha: 0.08);
-      } else if (_vehicleType == 'motor') {
-        statusText = 'Sedang Dipakai';
+    } else { // Motor Listrik (AC Relay)
+      bool isMotorInUse = _relayACState == 'ON' || _vehicleType == 'motor';
+      if (isMotorInUse) {
+        statusText = 'Terpakai';
         statusColor = AppColors.error;
         statusBgColor = AppColors.error.withValues(alpha: 0.08);
+      } else if (!_adminAcUnlocked) {
+        statusText = 'Tidak Tersedia';
+        statusColor = Colors.grey;
+        statusBgColor = Colors.grey.withValues(alpha: 0.08);
       } else {
         statusText = 'Tersedia';
         statusColor = AppColors.natureGreen;
@@ -570,16 +577,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                       color: AppColors.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: GoogleFonts.manrope(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   
                   // Status Pill Badge
                   Container(
