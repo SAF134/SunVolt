@@ -91,64 +91,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Hero Image ──
-                  Container(
-                    margin: const EdgeInsets.all(24),
-                    height: 250,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      image: const DecorationImage(
-                        image: NetworkImage(
-                          'https://bee.telkomuniversity.ac.id/wp-content/uploads/2024/11/DJI_0042-1024x576.webp',
-                        ),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    child: Stack(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.black.withValues(alpha: 0.6),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 24,
-                          left: 24,
-                          right: 24,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Stasiun SunVolt',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.white,
-                                        height: 1.2,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 24),
 
                   // ── Informasi Tarif ──
                   Padding(
@@ -248,18 +191,25 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
                   const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _vehicleOption(
-                          index: 0,
-                          icon: Icons.pedal_bike,
-                          title: 'Sepeda Listrik',
+                        // Sebelah Kiri: Motor Listrik
+                        Expanded(
+                          child: _vehicleCardOption(
+                            index: 1,
+                            icon: Icons.moped,
+                            title: 'Motor Listrik',
+                          ),
                         ),
-                        const SizedBox(height: 12),
-                        _vehicleOption(
-                          index: 1,
-                          icon: Icons.moped,
-                          title: 'Motor Listrik',
+                        const SizedBox(width: 14),
+                        // Sebelah Kanan: Sepeda Listrik
+                        Expanded(
+                          child: _vehicleCardOption(
+                            index: 0,
+                            icon: Icons.pedal_bike,
+                            title: 'Sepeda Listrik',
+                          ),
                         ),
                       ],
                     ),
@@ -471,7 +421,7 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
 
   // ─── Helper Widgets ───
 
-  Widget _vehicleOption({
+  Widget _vehicleCardOption({
     required int index,
     required IconData icon,
     required String title,
@@ -519,130 +469,146 @@ class _StationDetailScreenState extends State<StationDetailScreen> {
       onTap: () => setState(() => _selectedVehicle = index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         decoration: BoxDecoration(
           color: isSelected 
-              ? AppColors.primary.withValues(alpha: 0.04) 
+              ? AppColors.primary.withValues(alpha: 0.06) 
               : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
                 ? AppColors.primary
-                : Colors.black.withValues(alpha: 0.05),
-            width: isSelected ? 1.5 : 1.0,
+                : Colors.black.withValues(alpha: 0.06),
+            width: isSelected ? 2.0 : 1.0,
           ),
           boxShadow: [
             BoxShadow(
               color: isSelected
-                  ? AppColors.primary.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.02),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
+                  ? AppColors.primary.withValues(alpha: 0.12)
+                  : Colors.black.withValues(alpha: 0.03),
+              blurRadius: isSelected ? 18 : 12,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon Container
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.primary
-                    : AppColors.surfaceContainerLow,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                size: 24,
-                color: isSelected
-                    ? AppColors.onPrimaryFixed
-                    : AppColors.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(width: 16),
-            
-            // Text Column
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 16, 
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.onSurface,
+            // Top Row: Icon Container & Selection Radio Indicator
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.surfaceContainerLow,
+                    shape: BoxShape.circle,
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            )
+                          ]
+                        : null,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 26,
+                    color: isSelected
+                        ? AppColors.onPrimaryFixed
+                        : AppColors.onSurfaceVariant,
+                  ),
+                ),
+                
+                // Radio Circle Indicator
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.outlineVariant,
+                      width: 2,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  
-                  // Status Pill Badge
+                  child: isSelected
+                      ? Center(
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: const BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        )
+                      : null,
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+
+            // Vehicle Title
+            Text(
+              title,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: AppColors.onSurface,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            
+            const SizedBox(height: 8),
+
+            // Status Pill Badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: statusBgColor,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: statusColor.withValues(alpha: 0.15),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    width: 6,
+                    height: 6,
                     decoration: BoxDecoration(
-                      color: statusBgColor,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: statusColor.withValues(alpha: 0.15),
-                        width: 1,
-                      ),
+                      shape: BoxShape.circle,
+                      color: statusColor,
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: statusColor,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          statusText,
-                          style: GoogleFonts.manrope(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: statusColor,
-                          ),
-                        ),
-                      ],
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      statusText,
+                      style: GoogleFonts.manrope(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: statusColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
-            ),
-            
-            // Radio button
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected
-                      ? AppColors.primary
-                      : AppColors.outlineVariant,
-                  width: 2,
-                ),
-              ),
-              child: isSelected
-                  ? Center(
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    )
-                  : null,
             ),
           ],
         ),

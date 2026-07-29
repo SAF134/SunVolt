@@ -79,8 +79,16 @@ class HelpFaqScreen extends StatelessWidget {
                     'Tarif listrik di seluruh stasiun SunVolt adalah Rp 2.500 per kWh. Biaya dihitung secara presisi hanya berdasarkan energi yang benar-benar masuk ke baterai kendaraan Anda, bukan berdasarkan durasi atau waktu colok.',
                   ),
                   _buildFaqItem(
-                    'Bagaimana aturan ketersediaan slot pengisian daya?',
-                    'Pengguna dapat mengisi daya sepeda listrik ketika Relay DC aktif dan slot Sepeda berstatus "Tersedia". Begitu pula untuk motor listrik, pengisian dapat dilakukan ketika Relay AC aktif dan slot Motor berstatus "Tersedia". Jika salah satu slot sedang digunakan oleh orang lain ("Sedang Dipakai"), Anda harus menunggu hingga pengguna tersebut selesai.',
+                    'Bagaimana aturan status 3 tingkat ketersediaan stasiun?',
+                    'Setiap slot kendaraan (Sepeda Listrik/DC & Motor Listrik/AC) memiliki 3 status real-time:\n• Tersedia (Hijau): Slot unlocked oleh Admin dan relay dalam keadaan bebas. Pengguna dapat memilih kendaraan dan menekan "Mulai Isi Daya" untuk mengaktifkan relay secara otomatis.\n• Tidak Tersedia (Abu-abu): Slot locked oleh Admin melalui Web Admin. Aliran listrik dikunci sehingga pengguna tidak dapat memulai pengisian daya.\n• Terpakai (Merah): Slot sedang aktif digunakan oleh pengguna lain. Pengguna lain harus menunggu hingga pengisian daya selesai.',
+                  ),
+                  _buildFaqItem(
+                    'Bagaimana presisi pengukuran daya 4 digit desimal?',
+                    'Untuk menjamin akurasi dan transparansi data yang maksimal, aplikasi SunVolt menampilkan dan mencatat nilai pemakaian energi hingga 4 digit di belakang koma (misalnya 0,0857 kWh) baik pada layar pengisian real-time maupun pada riwayat transaksi.',
+                  ),
+                  _buildFaqItem(
+                    'Apa itu status OVRIDE Admin pada layar pengisian?',
+                    'Status OVRIDE Admin menampilkan indikator apakah Admin Web sedang mengambil alih kontrol manual pada stasiun. Jika OVRIDE Aktif dan Admin mematikan relay dari website admin, aplikasi akan secara otomatis mendeteksi terputusnya aliran listrik dan memproses penghentian pengisian daya secara aman.',
                   ),
                   _buildFaqItem(
                     'Berapa minimum saldo untuk mulai mengisi?',
@@ -111,8 +119,8 @@ class HelpFaqScreen extends StatelessWidget {
                     'Ya, tentu saja. Aplikasi SunVolt dilengkapi dengan fitur sinkronisasi latar belakang. Jika Anda menekan tombol beranda atau meminimalkan aplikasi, sistem akan terus menghitung dan mengakumulasikan pemakaian energi secara real-time. Begitu aplikasi dibuka kembali, data persentase dan biaya pengisian akan diperbarui secara instan.',
                   ),
                   _buildFaqItem(
-                    'Bagaimana cara menggunakan panel informasi stasiun?',
-                    'Kami menyediakan lembar detail stasiun bertema Glassmorphism di bagian bawah peta. Anda dapat menyeret (drag) panel tersebut ke atas menggunakan jari untuk membacanya, atau mengusapnya ke bawah untuk menutupnya dengan efek pegas elastis yang halus.',
+                    'Bagaimana tampilan foto dan panel informasi stasiun?',
+                    'Halaman Detail Stasiun menampilkan foto stasiun dalam format portrait dengan rasio 9:16 yang utuh serta panel informasi tarif dan pilihan kendaraan yang interaktif.',
                   ),
 
                   const SizedBox(height: 24),

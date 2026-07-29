@@ -55,33 +55,37 @@ class SunVoltHistoryCard extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(1.5),
         child: Container(
-          padding: const EdgeInsets.all(18.5),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppColors.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(14.5),
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ── Header Row ──
               Row(
                 children: [
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
                       color: accentBg,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(icon, color: accentColor, size: 24),
+                    child: Icon(icon, color: accentColor, size: 22),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16,
+                            fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: AppColors.onSurface,
                           ),
@@ -89,16 +93,19 @@ class SunVoltHistoryCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           station,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.manrope(
-                            fontSize: 13,
+                            fontSize: 12.5,
                             color: AppColors.onSurfaceVariant,
                           ),
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: accentBg,
                       borderRadius: BorderRadius.circular(999),
@@ -113,7 +120,7 @@ class SunVoltHistoryCard extends StatelessWidget {
                     ),
                   ),
                   if (onDelete != null) ...[
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     GestureDetector(
                       onTap: onDelete,
                       child: Container(
@@ -128,21 +135,105 @@ class SunVoltHistoryCard extends StatelessWidget {
                   ],
                 ],
               ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _detailCol(Icons.schedule, time, null),
-                    _detailCol(Icons.bolt, energy, accentColor),
-                    _detailCol(Icons.payments, cost, accentColor),
-                  ],
-                ),
+              const SizedBox(height: 14),
+
+              // ── Responsive Simetris Detail Container ──
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  // Jika layar sangat sempit (<300px), gunakan layout 2 baris agar tetap rapi
+                  if (constraints.maxWidth < 300) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.schedule, size: 14, color: AppColors.onSurfaceVariant),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  time,
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.onSurface,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _detailItem(
+                                icon: Icons.bolt,
+                                text: energy,
+                                textColor: accentColor,
+                                alignment: Alignment.centerLeft,
+                              ),
+                              _detailItem(
+                                icon: Icons.payments,
+                                text: cost,
+                                textColor: accentColor,
+                                alignment: Alignment.centerRight,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // Layout 3 kolom simetris responsif (Time - Energy - Cost)
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        // Waktu (Kiri)
+                        Expanded(
+                          flex: 5,
+                          child: _detailItem(
+                            icon: Icons.schedule,
+                            text: time,
+                            textColor: null,
+                            alignment: Alignment.centerLeft,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        // Energi (Tengah)
+                        Expanded(
+                          flex: 4,
+                          child: _detailItem(
+                            icon: Icons.bolt,
+                            text: energy,
+                            textColor: accentColor,
+                            alignment: Alignment.center,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        // Biaya (Kanan)
+                        Expanded(
+                          flex: 4,
+                          child: _detailItem(
+                            icon: Icons.payments,
+                            text: cost,
+                            textColor: accentColor,
+                            alignment: Alignment.centerRight,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -151,20 +242,33 @@ class SunVoltHistoryCard extends StatelessWidget {
     );
   }
 
-  Widget _detailCol(IconData icon, String text, Color? textColor) {
-    return Row(
-      children: [
-        Icon(icon, size: 14, color: textColor ?? AppColors.onSurfaceVariant),
-        const SizedBox(width: 6),
-        Text(
-          text,
-          style: GoogleFonts.manrope(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: textColor ?? AppColors.onSurface,
-          ),
+  Widget _detailItem({
+    required IconData icon,
+    required String text,
+    required Color? textColor,
+    required Alignment alignment,
+  }) {
+    return Align(
+      alignment: alignment,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: alignment,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: textColor ?? AppColors.onSurfaceVariant),
+            const SizedBox(width: 4),
+            Text(
+              text,
+              style: GoogleFonts.manrope(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: textColor ?? AppColors.onSurface,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

@@ -94,16 +94,28 @@ class AboutScreen extends StatelessWidget {
                   _buildSectionTitle('Fitur Unggulan SunVolt'),
                   const SizedBox(height: 16),
                   _buildFeatureCard(
-                    icon: Icons.speed_rounded,
+                    icon: Icons.pin_drop_rounded,
                     color: AppColors.secondary,
-                    title: 'Adaptive Smart Charging (CC-CV)',
-                    desc: 'Profil kelistrikan yang otomatis menyesuaikan daya (Arus/Tegangan) demi menjaga keawetan dan kesehatan baterai secara jangka panjang.',
+                    title: 'Status Ketersediaan 3-Tingkat & Dual Relay',
+                    desc: 'Manajemen ketersediaan real-time (Tersedia, Tidak Tersedia, Terpakai) yang terintegrasi langsung dengan Relay AC (Motor) dan Relay DC (Sepeda) serta fitur OVRIDE Admin.',
                   ),
                   _buildFeatureCard(
-                    icon: Icons.layers_rounded,
+                    icon: Icons.electric_meter_rounded,
                     color: AppColors.primary,
-                    title: 'Interactive Glassmorphic Panel',
-                    desc: 'Lembar detail stasiun melayang berbasis Glassmorphism yang interaktif dengan gestur usap jari dan efek memantul (spring physics).',
+                    title: 'Pengukuran Energi 4 Digit Desimal',
+                    desc: 'Akurasi tinggi perhitungan pemakaian daya hingga 4 angka di belakang koma (misal: 0,0857 kWh) demi transparansi biaya pengisian.',
+                  ),
+                  _buildFeatureCard(
+                    icon: Icons.crop_portrait_rounded,
+                    color: AppColors.secondary,
+                    title: 'Responsif & Pratinjau Portrait 9:16',
+                    desc: 'Tata letak kartu riwayat aktivitas yang simetris di seluruh smartphone Android serta foto stasiun dalam rasio portrait 9:16 yang utuh.',
+                  ),
+                  _buildFeatureCard(
+                    icon: Icons.speed_rounded,
+                    color: AppColors.primary,
+                    title: 'Adaptive Smart Charging (CC-CV)',
+                    desc: 'Profil kelistrikan yang otomatis menyesuaikan daya (Arus/Tegangan) demi menjaga keawetan dan kesehatan baterai secara jangka panjang.',
                   ),
                   _buildFeatureCard(
                     icon: Icons.settings_backup_restore_rounded,
@@ -126,8 +138,10 @@ class AboutScreen extends StatelessWidget {
                   _buildInfoCard([
                     _infoEntry('Software Stack', 'Flutter (Android SDK) & Node.js Vercel'),
                     _infoEntry('Cloud Database', 'Google Cloud Firestore Real-time'),
-                    _infoEntry('Microcontroller', 'ESP32 Dev Module (IoT Relay)'),
-                    _infoEntry('Sensor Kelistrikan', 'ACS712 (Real-time Current)'),
+                    _infoEntry('Microcontroller', 'ESP32 Dev Module (IoT Dual Relay AC/DC)'),
+                    _infoEntry('Sensor Kelistrikan', 'ACS712 (Real-time Current Sensor)'),
+                    _infoEntry('Presisi Energi', '4 Digit Desimal (0.0000 kWh)'),
+                    _infoEntry('Payment Gateway', 'Midtrans Payment Gateway (Sandbox)'),
                     _infoEntry('Routing API', 'Open Source Routing Machine (OSRM)'),
                   ]),
 

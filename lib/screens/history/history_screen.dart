@@ -192,6 +192,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
+  String _formatEnergy4Decimals(dynamic rawEnergy, {required bool isPositive}) {
+    if (rawEnergy == null) {
+      return isPositive ? '+0.0000 kWh' : '-0.0000 kWh';
+    }
+    final String str = rawEnergy.toString().replaceAll('-', '').replaceAll('+', '').trim();
+    final match = RegExp(r'([0-9]+(?:\.[0-9]+)?)').firstMatch(str);
+    if (match != null) {
+      final val = double.tryParse(match.group(1)!) ?? 0.0;
+      final formatted = val.toStringAsFixed(4);
+      return isPositive ? '+$formatted kWh' : '-$formatted kWh';
+    }
+    return isPositive ? '+$str' : '-$str';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -284,14 +298,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     final amountStr = (data['amount'] ?? '')
                         .toString()
                         .replaceAll(RegExp(r'[^0-9]'), '');
-                    final amountNum = int.tryParse(amountStr) ?? 0;
-                    final kWh = (amountNum / 2500).toStringAsFixed(2);
-                    energyText = '+$kWh kWh';
+                    final amountNum = double.tryParse(amountStr) ?? 0.0;
+                    final kWhVal = amountNum / 2500.0;
+                    energyText = '+${kWhVal.toStringAsFixed(4)} kWh';
                   } else {
-                    final rawEnergy = data['energy'] ?? '1.00 kWh';
-                    energyText = rawEnergy.toString().startsWith('-')
-                        ? rawEnergy
-                        : '-$rawEnergy';
+                    final rawEnergy = data['energy'] ?? '0.0000 kWh';
+                    energyText = _formatEnergy4Decimals(rawEnergy, isPositive: false);
                   }
 
                   return SunVoltHistoryCard(

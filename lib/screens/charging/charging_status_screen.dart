@@ -586,7 +586,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
         'isPositive': false,
         'timestamp': FieldValue.serverTimestamp(),
         'type': 'charging',
-        'energy': '${energyKWh.toStringAsFixed(2)} kWh',
+        'energy': '${energyKWh.toStringAsFixed(4)} kWh',
         'duration_seconds': _elapsedSeconds,
         'waktu_selesai': '${DateFormat('HH:mm').format(DateTime.now())} WIB',
       });
@@ -933,7 +933,7 @@ class _ChargingStatusScreenState extends State<ChargingStatusScreen>
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                '${(_energyConsumedWh / 1000.0).toStringAsFixed(2)} kWh terpakai • Rp ${_tariffPerKWh.toInt()}/kWh',
+                                '${(_energyConsumedWh / 1000.0).toStringAsFixed(4)} kWh terpakai • Rp ${_tariffPerKWh.toInt()}/kWh',
                                   style: GoogleFonts.manrope(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
